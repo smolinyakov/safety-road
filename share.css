@@ -1,0 +1,21 @@
+﻿.share-route-button {
+  width: 100%; min-height: 42px; margin: 10px 0; border: 1px solid #b7cff5;
+  border-radius: 11px; background: #f4f8ff; color: #1769dd; font: inherit;
+  font-weight: 700; cursor: pointer; transition: .2s ease;
+}
+.share-route-button:hover { background: #e8f1ff; border-color: #1769dd; transform: translateY(-1px); }
+.route-share-modal { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(15,27,45,.48); }
+.route-share-dialog { position: relative; width: min(100%,410px); box-sizing: border-box; padding: 28px; border-radius: 20px; background: #fff; box-shadow: 0 22px 70px rgba(18,35,58,.28); text-align: center; }
+.route-share-dialog h2 { margin: 0 36px 8px; color: #15243a; font-size: 22px; }
+.route-share-dialog p { margin: 0 0 20px; color: #607087; line-height: 1.45; }
+.route-share-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f0f3f7; color: #526176; font-size: 24px; cursor: pointer; }
+.route-qr-code { display: grid; width: 216px; min-height: 216px; margin: 0 auto 18px; place-items: center; border: 1px solid #e2e7ee; border-radius: 14px; background: #fff; }
+.route-qr-code img, .route-qr-code canvas { display: block; }
+.route-qr-code--error { padding: 14px; box-sizing: border-box; color: #b44444; font-size: 14px; }
+.route-share-link { display: block; overflow: hidden; padding: 11px 12px; border-radius: 10px; background: #f5f7fa; color: #1769dd; font-size: 13px; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.route-share-copy { width: 100%; min-height: 42px; margin-top: 10px; border: 0; border-radius: 10px; background: #1769dd; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.modal-open { overflow: hidden; }
+
+/* Атрибут hidden должен иметь приоритет над сеточной раскладкой окна. */
+.route-share-modal[hidden] { display: none; }
+

@@ -92,8 +92,24 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+  <div class="route-share-modal" id="shareRouteModal" hidden>
+    <section class="route-share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareRouteTitle">
+      <button class="route-share-close" type="button" aria-label="Закрыть окно" data-close-share-modal>×</button>
+      <h2 id="shareRouteTitle">Поделиться маршрутом</h2>
+      <p>Отсканируйте QR-код или откройте ссылку на другом устройстве.</p>
+      <div class="route-qr-code" id="routeQrCode" aria-label="QR-код маршрута"></div>
+      <a class="route-share-link" id="shareRouteLink" href="#" target="_blank" rel="noopener"></a>
+      <button class="route-share-copy" id="copyRouteLink" type="button">Скопировать ссылку</button>
+    </section>
+  </div>
+
+  <link rel="stylesheet" href="share.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="share.js"></script>
 </body>
 </html>
+
+
 
 
 

@@ -995,3 +995,41 @@ clearStartButton.addEventListener('click', () => {
 
 
 
+
+// Формирует ссылку для QR-кода: сохраняет стартовую точку и выбранный вариант.
+window.getShareRouteUrl = function getShareRouteUrl() {
+  const shareUrl = new URL(window.location.href);
+  shareUrl.searchParams.delete('start');
+  shareUrl.searchParams.delete('variant');
+
+  if (startMarker) {
+    const point = startMarker.getLatLng();
+    shareUrl.searchParams.set('start', `${point.lat.toFixed(6)},${point.lng.toFixed(6)}`);
+  }
+
+  if (routeVariants.length) {
+    shareUrl.searchParams.set('variant', String(selectedRouteIndex + 1));
+  }
+
+  return shareUrl.toString();
+};
+
+// При открытии ссылки из QR-кода повторно строим маршрут от сохранённой точки.
+async function restoreSharedRouteFromUrl() {
+  const savedStart = new URLSearchParams(window.location.search).get('start');
+  const savedVariant = Number(new URLSearchParams(window.location.search).get('variant')) - 1;
+
+  if (!savedStart) return;
+
+  const [latitude, longitude] = savedStart.split(',').map(Number);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+  await buildRoute(L.latLng(latitude, longitude));
+  if (Number.isInteger(savedVariant) && routeVariants[savedVariant]) {
+    showSelectedRoute(savedVariant);
+  }
+}
+
+window.addEventListener('load', () => {
+  void restoreSharedRouteFromUrl();
+});
