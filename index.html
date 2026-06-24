@@ -1,0 +1,105 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Безопасный путь в школу — прототип</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Приложение делится на левую панель управления и область карты. -->
+  <div class="app">
+    <!-- Здесь пользователь выбирает стартовую точку и вариант маршрута. -->
+    <aside class="sidebar">
+      <!-- Презентационный блок: кратко объясняет назначение сервиса и школу. -->
+      <header class="project-hero">
+        <p class="eyebrow">Учебный прототип</p>
+        <h1>Безопасный путь<br />в школу</h1>
+        <p class="lead">
+          Укажите адрес или выберите стартовую точку на карте — сервис построит
+          пешеходные варианты пути до школы.
+        </p>
+
+        <section class="school-card" aria-label="Школа">
+          <div class="school-icon" aria-hidden="true">⌂</div>
+          <div>
+            <strong>МБОУ СОШ №85</strong>
+            <span>ул. Малиновского, 19 · Хабаровск</span>
+          </div>
+        </section>
+      </header>
+<section>
+        <h2>Точка отправления</h2>
+        <!-- Поле поддерживает поиск по кнопке и динамические подсказки во время ввода. -->
+        <form class="address-form" id="address-form">
+          <label class="visually-hidden" for="address-input">Адрес в Хабаровске</label>
+          <input
+            id="address-input"
+            type="search"
+            placeholder="Например: ул. Панфиловцев, 20"
+            autocomplete="street-address"
+            required
+          />
+          <button type="submit">Найти</button>
+        </form>
+        <div class="address-suggestions" id="address-suggestions" role="listbox" hidden></div>
+        <p class="address-hint">Или кликните по карте.</p>
+      </section>
+
+      <section>
+        <h2>Построение маршрута</h2>
+        <div class="info-card" aria-live="polite">
+          <p id="route-status">Введите адрес или нажмите на любое место карты.</p>
+          <div class="route-progress" id="route-progress" hidden>
+            <span data-progress="point">1. Точка</span>
+            <span data-progress="route">2. Маршрут</span>
+            <span data-progress="score">3. Оценка</span>
+          </div>
+          <ul class="route-reasons" id="route-reasons" hidden></ul>
+          <button class="clear-start" id="clear-start" type="button" hidden>Убрать точку</button>
+        </div>
+      </section>
+
+      <!-- Блок скрыт до первого успешного построения маршрута. -->
+      <section id="route-options-section" hidden>
+        <h2>Варианты маршрута</h2>
+        <div class="routes" id="route-options"></div>
+      </section>
+
+      <div class="legend" aria-label="Легенда карты">
+        <div class="legend-row"><i class="dot green"></i>рекомендуемый</div>
+        <div class="legend-row"><i class="dot orange"></i>есть участки внимания</div>
+        <div class="legend-row"><i class="dot red"></i>менее предпочтительный</div>
+      </div>
+
+      <details class="risk-help">
+        <summary>Как рассчитывается оценка?</summary>
+        <p>Это учебная оценка: сравниваются длина пути, число поворотов и пересечений. Она не заменяет сведения о ДТП или проверку маршрута взрослыми.</p>
+      </details>
+    </aside>
+
+    <!-- Leaflet создаёт карту внутри элемента с id="map". -->
+    <main class="map-area">
+      <div id="map"></div>
+      <div class="map-label">Кликните по карте или введите адрес слева.</div><!--  -->
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
