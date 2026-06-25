@@ -9,7 +9,7 @@
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles/style.css" />
 </head>
 <body>
   <!-- Приложение делится на левую панель управления и область карты. -->
@@ -25,11 +25,26 @@
           пешеходные варианты пути до школы.
         </p>
 
-        <section class="school-card" aria-label="Школа">
-          <div class="school-icon" aria-hidden="true">⌂</div>
-          <div>
-            <strong>МБОУ СОШ №85</strong>
-            <span>ул. Малиновского, 19 · Хабаровск</span>
+        <section class="school-picker" aria-label="Выбор школы">
+          <button class="school-card school-card-button" id="school-picker-button" type="button" aria-expanded="false" aria-controls="school-picker-panel">
+            <div class="school-icon" aria-hidden="true">⌂</div>
+            <div class="school-card-text">
+              <strong id="selected-school-name">МБОУ СОШ №85</strong>
+              <span id="selected-school-address">ул. Малиновского, 19 · Хабаровск</span>
+            </div>
+            <span class="school-arrow" aria-hidden="true"><span></span></span>
+          </button>
+
+          <div class="school-picker-panel" id="school-picker-panel" hidden>
+            <label class="visually-hidden" for="school-search-input">Поиск школы или лицея</label>
+            <input
+              class="school-search-input"
+              id="school-search-input"
+              type="search"
+              placeholder="Найти школу или лицей"
+              autocomplete="off"
+            />
+            <div class="school-list" id="school-list" role="listbox" aria-label="Школы и лицеи Хабаровска"></div>
           </div>
         </section>
       </header>
@@ -65,6 +80,20 @@
         </div>
       </section>
 
+      <section class="manual-signs-panel" aria-label="Ручное добавление дорожных знаков" hidden>
+        <h2>Дорожные знаки</h2>
+        <button class="add-sign-toggle" id="add-sign-toggle" type="button">Добавить знак</button>
+        <div class="sign-picker" id="sign-picker" hidden>
+          <p>Выберите тип знака.</p>
+          <div class="sign-options" role="listbox" aria-label="Тип знака">
+            <button class="sign-option is-selected" type="button" data-sign-type="crossing"><img src="images/RU_road_sign_5.19.2.svg" alt="" /> <span>Пешеходный переход</span></button>
+            <button class="sign-option" type="button" data-sign-type="light"><span class="sign-option-icon" aria-hidden="true">🚦</span> <span>Светофор</span></button>
+            <button class="sign-option" type="button" data-sign-type="speed"><span class="sign-option-icon sign-option-icon--speed" aria-hidden="true">40</span> <span>Ограничение 40</span></button>
+          </div>
+          <button class="cancel-sign-mode" id="cancel-sign-mode" type="button">Отменить</button>
+        </div>
+      </section>
+
       <!-- Блок скрыт до первого успешного построения маршрута. -->
       <section id="route-options-section" hidden>
         <h2>Варианты маршрута</h2>
@@ -91,7 +120,8 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
+  <script src="scripts/schools-data.js"></script>
+  <script src="scripts/app.js"></script>
   <div class="route-share-modal" id="shareRouteModal" hidden>
     <section class="route-share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareRouteTitle">
       <button class="route-share-close" type="button" aria-label="Закрыть окно" data-close-share-modal>×</button>
@@ -103,11 +133,21 @@
     </section>
   </div>
 
-  <link rel="stylesheet" href="share.css">
+  <link rel="stylesheet" href="styles/share.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="share.js"></script>
+  <script src="scripts/share.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 
 
 
