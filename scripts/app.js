@@ -101,6 +101,7 @@ let activeAddressRequest;
 let routeVariants = [];
 let selectedRouteIndex = 0;
 let addressSearchTimer;
+let currentProgressStage = "idle";
 let isAddingManualSign = false;
 let selectedManualSignType = "crossing";
 let manualSigns = [];
@@ -322,28 +323,44 @@ function setStatus(message) {
 }
 
 // Управляет этапами построения: активный этап крутится, завершённый получает галочку.
+// Если построение сорвалось, последний активный этап получает красный крестик без анимации.
 function setProgress(stage) {
   const stages = ["point", "route", "score"];
-  const activeIndex = stages.indexOf(stage);
 
-  if (stage === "failed") {
+  if (stage === "idle") {
+    currentProgressStage = "idle";
     routeProgressElement.hidden = true;
+    routeProgressElement
+      .querySelectorAll("[data-progress]")
+      .forEach((element) => {
+        element.classList.remove("is-active", "is-complete", "is-failed");
+      });
     return;
   }
+
+  const activeIndex = stages.indexOf(stage);
+  const failedIndex = stages.indexOf(currentProgressStage);
 
   routeProgressElement.hidden = false;
   routeProgressElement
     .querySelectorAll("[data-progress]")
     .forEach((element, index) => {
+      const isFailedStage = stage === "failed" && index === failedIndex;
+
       element.classList.toggle(
         "is-active",
-        index === activeIndex && stage !== "done",
+        index === activeIndex && stage !== "done" && stage !== "failed",
       );
       element.classList.toggle(
         "is-complete",
-        index < activeIndex || stage === "done",
+        stage === "failed" ? index < failedIndex : index < activeIndex || stage === "done",
       );
+      element.classList.toggle("is-failed", isFailedStage);
     });
+
+  if (stages.includes(stage)) {
+    currentProgressStage = stage;
+  }
 }
 
 // Не маскируем ошибку сети: выводим текст, который реально вернул код или сервис.
@@ -1575,7 +1592,7 @@ clearStartButton.addEventListener("click", () => {
   routeReasonsElement.hidden = true;
   optionsSection.hidden = true;
   updateManualSignsPanelVisibility();
-  setProgress("failed");
+  setProgress("idle");
   setStatus(
     "Точка отправления удалена. Выберите новое место на карте или введите адрес.",
   );
@@ -1639,6 +1656,7 @@ async function restoreSharedRouteFromUrl() {
 window.addEventListener("load", () => {
   void restoreSharedRouteFromUrl();
 });
+
 
 
 

@@ -579,7 +579,7 @@ h2 {
   transition: color 0.2s ease;
 }
 
-.route-progress span:not(.is-active):not(.is-complete) {
+.route-progress span:not(.is-active):not(.is-complete):not(.is-failed) {
   display: none;
 }
 .route-progress span::before {
@@ -616,6 +616,19 @@ h2 {
   background: #1e8e5a;
   border-color: #1e8e5a;
   content: "✓";
+}
+
+.route-progress .is-failed {
+  color: var(--red);
+  font-weight: 800;
+}
+
+.route-progress .is-failed::before {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+  content: "×";
+  animation: none;
 }
 
 @keyframes route-progress-spin {
@@ -919,6 +932,7 @@ h2 {
 .map-area.is-placing-sign #map {
   cursor: crosshair;
 }
+
 
 
 
