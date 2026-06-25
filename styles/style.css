@@ -461,6 +461,12 @@ h2 {
     border-right: 0;
   }
 
+  /* iOS Safari зумит страницу при фокусе на input меньше 16px. */
+  .address-form input,
+  .school-search-input {
+    font-size: 16px;
+  }
+
   /* Карта занимает всё оставшееся пространство окна. */
   .map-area {
     height: 62vh;
@@ -932,6 +938,7 @@ h2 {
 .map-area.is-placing-sign #map {
   cursor: crosshair;
 }
+
 
 
 
