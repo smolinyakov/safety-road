@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Безопасный путь в школу — прототип</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
 
   <link
     rel="stylesheet"
@@ -27,7 +28,17 @@
 
         <section class="school-picker" aria-label="Выбор школы">
           <button class="school-card school-card-button" id="school-picker-button" type="button" aria-expanded="false" aria-controls="school-picker-panel">
-            <div class="school-icon" aria-hidden="true">⌂</div>
+            <div class="school-icon" aria-hidden="true">
+              <svg width="25" height="25" viewBox="0 0 26 26" focusable="false">
+                <path d="M4 21.5h18" stroke="#dbeaff" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 11.2 13 6l7 5.2v10.3H6V11.2Z" fill="#fff"/>
+                <path d="M4.8 11.5 13 5.3l8.2 6.2" fill="none" stroke="#dbeaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10.2 21.5v-5.4h5.6v5.4" fill="#1769d2" opacity="0.95"/>
+                <path d="M8.1 12.6h3.1v2.7H8.1v-2.7Zm6.7 0h3.1v2.7h-3.1v-2.7Z" fill="#8ab4f8"/>
+                <path d="M13 5.3V2.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M13.8 3.1h4.2l-1 1.4 1 1.4h-4.2V3.1Z" fill="#fdd663"/>
+              </svg>
+            </div>
             <div class="school-card-text">
               <strong id="selected-school-name">МБОУ СОШ №85</strong>
               <span id="selected-school-address">ул. Малиновского, 19 · Хабаровск</span>
@@ -138,6 +149,7 @@
   <script src="scripts/share.js"></script>
 </body>
 </html>
+
 
 
 

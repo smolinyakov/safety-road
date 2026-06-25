@@ -271,6 +271,10 @@ h2 {
   font-size: 16px;
 }
 
+.school-icon svg {
+  display: block;
+}
+
 .school-card strong,
 .school-card span {
   display: block;
@@ -938,6 +942,7 @@ h2 {
 .map-area.is-placing-sign #map {
   cursor: crosshair;
 }
+
 
 
 
