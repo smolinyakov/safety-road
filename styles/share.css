@@ -110,53 +110,63 @@
 .route-share-modal[hidden] {
   display: none;
 }
-/* Адаптация окна шаринга: на узких экранах оно превращается в удобный нижний лист. */
-@media (max-width: 760px) {
-  .route-share-modal {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 12px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
+/* Простая адаптация модального окна под разные размеры экранов. */
+@media (max-width: 1024px) {
   .route-share-dialog {
-    width: 100%;
-    max-width: 430px;
-    max-height: min(92dvh, 680px);
-    padding: 22px 16px max(18px, env(safe-area-inset-bottom));
-    overflow-y: auto;
-    border-radius: 22px 22px 16px 16px;
-  }
-
-  .route-share-dialog h2 {
-    margin: 0 42px 8px;
-    font-size: 20px;
-    line-height: 1.18;
-  }
-
-  .route-share-dialog p {
-    margin-bottom: 14px;
-    font-size: 14px;
-  }
-
-  .route-share-close {
-    top: 10px;
-    right: 10px;
+    width: 380px;
+    padding: 24px;
   }
 
   .route-qr-code {
-    width: min(196px, 62vw);
-    min-height: min(196px, 62vw);
-    margin-bottom: 14px;
+    width: 200px;
+    min-height: 200px;
   }
 
   .route-qr-code img,
   .route-qr-code canvas {
+    width: 180px !important;
+    height: 180px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .route-share-modal {
+    align-items: center;
+    justify-items: center;
+    padding: 14px;
+    overflow-y: auto;
+  }
+
+  .route-share-dialog {
+    width: 340px;
     max-width: 100%;
-    height: auto;
+    max-height: 92vh;
+    padding: 20px 16px;
+    overflow-y: auto;
+    border-radius: 18px;
+  }
+
+  .route-share-dialog h2 {
+    margin: 0 36px 8px;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .route-share-dialog p {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .route-qr-code {
+    width: 188px;
+    min-height: 188px;
+    margin-bottom: 12px;
+  }
+
+  .route-qr-code img,
+  .route-qr-code canvas {
+    width: 168px !important;
+    height: 168px !important;
   }
 
   .route-share-link {
@@ -166,18 +176,20 @@
   }
 }
 
-@media (max-width: 420px), (max-height: 620px) {
+@media (max-width: 480px) {
   .route-share-modal {
-    padding: 8px;
+    padding: 10px;
   }
 
   .route-share-dialog {
-    max-height: calc(100dvh - 16px);
-    padding: 18px 12px max(14px, env(safe-area-inset-bottom));
-    border-radius: 18px;
+    width: 310px;
+    max-height: 90vh;
+    padding: 18px 14px;
+    border-radius: 16px;
   }
 
   .route-share-dialog h2 {
+    margin: 0 34px 6px;
     font-size: 18px;
   }
 
@@ -186,15 +198,85 @@
     font-size: 13px;
   }
 
+  .route-share-close {
+    top: 9px;
+    right: 9px;
+    width: 32px;
+    height: 32px;
+  }
+
   .route-qr-code {
-    width: min(172px, 58vw);
-    min-height: min(172px, 58vw);
+    width: 168px;
+    min-height: 168px;
     margin-bottom: 10px;
   }
 
-  .route-share-copy,
-  .share-route-button {
+  .route-qr-code img,
+  .route-qr-code canvas {
+    width: 148px !important;
+    height: 148px !important;
+  }
+
+  .route-share-copy {
     min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .route-share-modal {
+    padding: 8px;
+  }
+
+  .route-share-dialog {
+    width: 288px;
+    max-height: 88vh;
+    padding: 16px 12px;
+  }
+
+  .route-share-dialog h2 {
+    font-size: 17px;
+  }
+
+  .route-qr-code {
+    width: 150px;
+    min-height: 150px;
+  }
+
+  .route-qr-code img,
+  .route-qr-code canvas {
+    width: 132px !important;
+    height: 132px !important;
+  }
+}
+
+@media (max-height: 620px) {
+  .route-share-modal {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    overflow-y: auto;
+  }
+
+  .route-share-dialog {
+    max-height: calc(100vh - 16px);
+    padding-top: 14px;
+    padding-bottom: 14px;
+    overflow-y: auto;
+  }
+
+  .route-share-dialog p {
+    margin-bottom: 8px;
+  }
+
+  .route-qr-code {
+    width: 142px;
+    min-height: 142px;
+    margin-bottom: 8px;
+  }
+
+  .route-qr-code img,
+  .route-qr-code canvas {
+    width: 124px !important;
+    height: 124px !important;
   }
 }
 
