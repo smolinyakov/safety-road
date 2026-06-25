@@ -94,6 +94,7 @@ const manualSignsPanel = document.querySelector(".manual-signs-panel");
 const addSignToggle = document.getElementById("add-sign-toggle");
 const signPicker = document.getElementById("sign-picker");
 const cancelSignModeButton = document.getElementById("cancel-sign-mode");
+const clearManualSignsButton = document.getElementById("clear-manual-signs");
 const signOptionButtons = document.querySelectorAll("[data-sign-type]");
 const mapArea = document.querySelector(".map-area");
 
@@ -615,6 +616,10 @@ const manualSignTypes = {
     symbol: "40",
     title: "Ограничение скорости: 40 км/ч",
   },
+  danger: {
+    symbol: "!",
+    title: "Опасный участок дороги",
+  },
 };
 
 // Создаёт содержимое popup для ручного знака с кнопкой удаления.
@@ -644,7 +649,7 @@ function renderManualSigns() {
     const typeInfo = manualSignTypes[sign.type] ?? manualSignTypes.crossing;
     const marker = L.marker([sign.lat, sign.lng], {
       icon: createSafetyIcon(typeInfo.symbol, sign.type),
-      zIndexOffset: sign.type === "light" ? 1200 : 900,
+      zIndexOffset: sign.type === "light" || sign.type === "danger" ? 1200 : 900,
     }).addTo(map);
 
     marker.bindPopup(makeManualSignPopup(sign));
@@ -671,6 +676,15 @@ function addManualSign(latlng, type = selectedManualSignType) {
   renderManualSigns();
 }
 
+// Удаляет последний поставленный пользователем знак. Используется для Ctrl+Z.
+function undoLastManualSign() {
+  const lastSign = manualSigns[manualSigns.length - 1];
+
+  if (lastSign) {
+    removeManualSign(lastSign.id);
+  }
+}
+
 // Удаляет конкретный пользовательский знак.
 function removeManualSign(id) {
   const sign = manualSigns.find((item) => item.id === id);
@@ -682,15 +696,18 @@ function removeManualSign(id) {
   manualSigns = manualSigns.filter((item) => item.id !== id);
 }
 
-// Полностью очищает пользовательские знаки и выключает режим их постановки.
-function clearManualSigns() {
+// Полностью очищает пользовательские знаки. Обычно также выключает режим постановки.
+function clearManualSigns(shouldExitMode = true) {
   manualSigns.forEach((sign) => {
     if (sign.marker) {
       map.removeLayer(sign.marker);
     }
   });
   manualSigns = [];
-  setManualSignMode(false);
+
+  if (shouldExitMode) {
+    setManualSignMode(false);
+  }
 }
 
 // Показывает панель ручных знаков только когда маршрут уже построен.
@@ -711,7 +728,7 @@ function setManualSignMode(isActive) {
   isAddingManualSign = isActive;
   signPicker.hidden = !isActive;
   addSignToggle.classList.toggle("is-active", isActive);
-  addSignToggle.textContent = "Добавить знак";
+  addSignToggle.textContent = isActive ? "Скрыть" : "Добавить знак";
   mapArea?.classList.toggle("is-placing-sign", isActive);
 }
 
@@ -1229,8 +1246,12 @@ async function buildRoute(clickedPoint) {
 
       if (startMarker) {
         startMarker.setLatLng(snappedPoint);
+        startMarker.setZIndexOffset(3000);
       } else {
-        startMarker = L.marker(snappedPoint, { icon: startIcon }).addTo(map);
+        startMarker = L.marker(snappedPoint, {
+          icon: startIcon,
+          zIndexOffset: 3000,
+        }).addTo(map);
         clearStartButton.hidden = false;
       }
     }
@@ -1549,12 +1570,31 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Escape закрывает список, если пользователь передумал выбирать школу.
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    setSchoolPickerOpen(false);
-  }
-});
+// Горячие клавиши: Ctrl/Cmd+Z удаляет последний ручной знак, Escape закрывает список школ.
+document.addEventListener(
+  "keydown",
+  (event) => {
+    const isUndoShortcut =
+      (event.ctrlKey || event.metaKey) &&
+      !event.shiftKey &&
+      (event.code === "KeyZ" || event.key.toLowerCase() === "z");
+    const isTextInput = event.target instanceof HTMLElement && Boolean(
+      event.target.closest("input, textarea, [contenteditable=\"true\"]"),
+    );
+
+    if (isUndoShortcut && !isTextInput && manualSigns.length) {
+      event.preventDefault();
+      event.stopPropagation();
+      undoLastManualSign();
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setSchoolPickerOpen(false);
+    }
+  },
+  true,
+);
 
 addSignToggle.addEventListener("click", () => {
   setManualSignMode(!isAddingManualSign);
@@ -1562,6 +1602,10 @@ addSignToggle.addEventListener("click", () => {
 
 cancelSignModeButton.addEventListener("click", () => {
   setManualSignMode(false);
+});
+
+clearManualSignsButton.addEventListener("click", () => {
+  clearManualSigns(false);
 });
 
 signOptionButtons.forEach((button) => {
@@ -1671,6 +1715,10 @@ window.addEventListener("load", () => {
 
 
 
+
+
+
+/*  */
 
 
 

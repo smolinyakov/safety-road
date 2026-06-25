@@ -100,8 +100,12 @@
             <button class="sign-option is-selected" type="button" data-sign-type="crossing"><img src="images/RU_road_sign_5.19.2.svg" alt="" /> <span>Пешеходный переход</span></button>
             <button class="sign-option" type="button" data-sign-type="light"><span class="sign-option-icon" aria-hidden="true">🚦</span> <span>Светофор</span></button>
             <button class="sign-option" type="button" data-sign-type="speed"><span class="sign-option-icon sign-option-icon--speed" aria-hidden="true">40</span> <span>Ограничение 40</span></button>
+            <button class="sign-option" type="button" data-sign-type="danger"><span class="sign-option-icon sign-option-icon--danger" aria-hidden="true">!</span> <span>Опасный участок дороги</span></button>
           </div>
-          <button class="cancel-sign-mode" id="cancel-sign-mode" type="button">Отменить</button>
+          <div class="sign-picker-actions">
+            <button class="cancel-sign-mode" id="cancel-sign-mode" type="button">Отменить</button>
+            <button class="clear-manual-signs" id="clear-manual-signs" type="button">Очистить все знаки</button>
+          </div>
         </div>
       </section>
 
@@ -149,6 +153,8 @@
   <script src="scripts/share.js"></script>
 </body>
 </html>
+
+
 
 
 

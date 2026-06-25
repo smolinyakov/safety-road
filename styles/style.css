@@ -776,6 +776,39 @@ h2 {
   font-weight: 800;
 }
 
+.safety-sign--danger {
+  position: relative;
+  width: 34px;
+  height: 30px;
+  background: #e53935;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: 0 2px 7px rgb(32 33 36 / 20%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  font-size: 0;
+}
+
+.safety-sign--danger::before {
+  position: absolute;
+  inset: 5px 6px 4px;
+  background: #fff;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.safety-sign--danger::after {
+  position: absolute;
+  inset: 8px 0 3px;
+  display: grid;
+  color: #111;
+  content: "!";
+  place-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .safety-popup > strong {
   display: block;
   margin: 0 0 8px;
@@ -810,6 +843,7 @@ h2 {
 
 .add-sign-toggle,
 .cancel-sign-mode,
+.clear-manual-signs,
 .sign-option {
   display: flex;
   gap: 9px;
@@ -904,6 +938,35 @@ h2 {
   font-size: 10px;
   font-weight: 900;
 }
+
+.sign-option-icon--danger {
+  position: relative;
+  background: #e53935;
+  border-radius: 2px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  font-size: 0;
+}
+
+.sign-option-icon--danger::before {
+  position: absolute;
+  inset: 4px 5px 3px;
+  background: #fff;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.sign-option-icon--danger::after {
+  position: absolute;
+  inset: 6px 0 2px;
+  display: grid;
+  color: #111;
+  content: "!";
+  place-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
 .sign-option:hover,
 .sign-option.is-selected {
   color: #185abc;
@@ -911,7 +974,15 @@ h2 {
   border-color: #abc9fb;
 }
 
-.cancel-sign-mode {
+.sign-picker-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cancel-sign-mode,
+.clear-manual-signs {
   justify-self: start;
   padding: 0;
   color: #5f6368;
@@ -922,7 +993,8 @@ h2 {
   font-size: 12px;
 }
 
-.cancel-sign-mode:hover {
+.cancel-sign-mode:hover,
+.clear-manual-signs:hover {
   color: #c5221f;
 }
 
@@ -942,6 +1014,11 @@ h2 {
 .map-area.is-placing-sign #map {
   cursor: crosshair;
 }
+
+
+
+
+
 
 
 
