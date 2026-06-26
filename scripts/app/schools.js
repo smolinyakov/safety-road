@@ -19,9 +19,12 @@ function updateSelectedSchoolCard() {
 function setSchoolPickerOpen(isOpen) {
   schoolPickerPanel.hidden = !isOpen;
   schoolPickerButton.setAttribute("aria-expanded", String(isOpen));
+  // Класс нужен мобильной верстке: когда список школ открыт, поиск адреса
+  // сдвигается ниже и не накладывается на выпадающую панель.
+  document.body.classList.toggle("is-school-picker-open", isOpen);
 
   if (isOpen) {
-    schoolSearchInput.focus();
+    schoolSearchInput.focus({ preventScroll: true });
     renderSchoolList(schoolSearchInput.value);
   }
 }
@@ -204,3 +207,4 @@ function selectSchool(schoolItem) {
     );
   }
 }
+

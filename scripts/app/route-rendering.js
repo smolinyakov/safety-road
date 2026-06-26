@@ -127,9 +127,11 @@ async function buildRoute(clickedPoint) {
           icon: startIcon,
           zIndexOffset: 3000,
         }).addTo(map);
-        clearStartButton.hidden = false;
       }
     }
+    document.body.classList.add("has-start-point");
+    updateAddressClearVisibility();
+    void updateAddressInputFromPoint(startMarker?.getLatLng?.() ?? clickedPoint);
 
     setProgress("score");
     setStatus("Оцениваю варианты маршрута…");
@@ -168,3 +170,5 @@ async function buildRoute(clickedPoint) {
     }
   }
 }
+
+

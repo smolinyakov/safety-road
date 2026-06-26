@@ -216,18 +216,3 @@
   margin: 8px 0 0;
 }
 
-.clear-start {
-  margin-top: 12px;
-  padding: 0;
-  color: #5f6368;
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid currentcolor;
-  font: inherit;
-  font-size: 12px;
-}
-
-.clear-start:hover {
-  color: #c5221f;
-}

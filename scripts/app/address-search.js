@@ -143,11 +143,87 @@ function clearAddressSuggestions() {
   suggestionsElement.hidden = true;
 }
 
+
+// Показывает крестик очистки только тогда, когда в поле есть адрес или выбрана точка.
+function updateAddressClearVisibility() {
+  if (!addressClearButton) return;
+  addressClearButton.hidden = !addressInput.value.trim() && !startMarker;
+}
+
+// Формирует короткий, читаемый адрес из ответа Nominatim.
+function formatReadableAddress(place) {
+  if (!place) return "";
+
+  const address = place.address ?? {};
+  const road =
+    address.road ??
+    address.pedestrian ??
+    address.footway ??
+    address.path ??
+    address.neighbourhood ??
+    address.suburb;
+  const house = address.house_number;
+  const city = address.city ?? address.town ?? address.village ?? "Хабаровск";
+
+  if (road && house) return `${road}, ${house}`;
+  if (road) return `${road}, ${city}`;
+
+  return (place.display_name ?? "").split(",").slice(0, 3).join(",").trim();
+}
+
+// По координатам получает ближайший адрес. Это нужно после клика по карте:
+// пользователь ставит точку, а поле поиска само показывает понятный адрес.
+async function updateAddressInputFromPoint(point) {
+  if (activeReverseAddressRequest) {
+    activeReverseAddressRequest.abort();
+  }
+
+  const latlng = L.latLng(point);
+  const controller = new AbortController();
+  activeReverseAddressRequest = controller;
+  const reverseUrl = geocodingService.replace(/\/search$/, "/reverse");
+  const parameters = new URLSearchParams({
+    lat: String(latlng.lat),
+    lon: String(latlng.lng),
+    format: "jsonv2",
+    addressdetails: "1",
+    zoom: "18",
+  });
+
+  try {
+    const response = await fetch(`${reverseUrl}?${parameters}`, {
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Обратный геокодер вернул код ${response.status}`);
+    }
+
+    const place = await response.json();
+
+    if (activeReverseAddressRequest !== controller) return;
+    const readableAddress = formatReadableAddress(place);
+
+    if (readableAddress) {
+      addressInput.value = readableAddress;
+      updateAddressClearVisibility();
+    }
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.warn("Не удалось определить ближайший адрес", error);
+    }
+  } finally {
+    if (activeReverseAddressRequest === controller) {
+      activeReverseAddressRequest = null;
+    }
+  }
+}
 // Передаёт найденный адрес в тот же механизм, что и клик пользователя по карте.
 function selectAddress(place) {
   const point = L.latLng(Number(place.lat), Number(place.lon));
 
-  addressInput.value = place.display_name.split(",").slice(0, 3).join(",");
+  addressInput.value = formatReadableAddress(place) || place.display_name.split(",").slice(0, 3).join(",");
+  updateAddressClearVisibility();
   clearAddressSuggestions();
   map.setView(point, 16);
   buildRoute(point);
@@ -238,3 +314,5 @@ async function searchAddressSuggestions(query) {
     activeAddressRequest = null;
   }
 }
+
+

@@ -11,6 +11,30 @@
   cursor: pointer;
   transition: 0.2s ease;
 }
+.share-route-icon {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  margin-right: 7px;
+  vertical-align: -5px;
+  place-items: center;
+}
+
+.share-route-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: currentcolor;
+  stroke: currentcolor;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.share-route-button[hidden] {
+  display: none;
+}
+
 .share-route-button:hover {
   background: #e8f1ff;
   border-color: #1769dd;
@@ -277,6 +301,63 @@
   .route-qr-code canvas {
     width: 124px !important;
     height: 124px !important;
+  }
+}
+@media (max-width: 760px) {
+  .share-route-button {
+    position: fixed;
+    z-index: 1100;
+    right: 14px;
+    bottom: calc(var(--mobile-collapsed-sheet, 126px) + env(safe-area-inset-bottom) + 18px);
+    display: grid;
+    width: 50px;
+    min-width: 50px;
+    height: 50px;
+    min-height: 50px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    color: #fff;
+    background: #1a73e8;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgb(15 27 45 / 18%);
+    place-items: center;
+    font-size: 0;
+  }
+  .share-route-button .share-route-icon {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    color: #fff;
+    filter: none;
+    place-items: center;
+    vertical-align: 0;
+  }
+
+  .share-route-button .share-route-icon svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+    overflow: visible;
+  }
+
+  .share-route-button .share-route-text {
+    display: none;
+  }
+
+  .share-route-button:hover {
+    background: #1765cc;
+    transform: none;
+  }
+
+  .sidebar.is-mobile-expanded .share-route-button {
+    bottom: calc(min(68dvh, 560px) + env(safe-area-inset-bottom) + 18px);
+  }
+
+  .share-route-button[hidden] {
+    display: none;
   }
 }
 

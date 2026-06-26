@@ -12,12 +12,25 @@
   button.type = "button";
   button.className = "share-route-button";
   button.hidden = true;
-  button.innerHTML = '<span aria-hidden="true">↗</span> Поделиться маршрутом';
+  button.innerHTML = `
+    <span class="share-route-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" focusable="false">
+        <path d="M25 28 41 18M25 36l16 10" />
+        <circle cx="20" cy="32" r="7" />
+        <circle cx="46" cy="15" r="7" />
+        <circle cx="46" cy="49" r="7" />
+      </svg>
+    </span>
+    <span class="share-route-text">Поделиться маршрутом</span>
+  `;
 
-  // Кнопка выводится рядом с уже существующей кнопкой удаления стартовой точки.
-  const clearButton = document.getElementById("clear-start");
+  // На десктопе кнопка визуально остается в левой панели, а на мобильной
+  // CSS превращает этот же элемент в плавающую кнопку справа на карте.
+  const shareHost = document.getElementById("share-button-host");
   const routesSection = document.getElementById("route-options-section");
-  if (clearButton) clearButton.insertAdjacentElement("beforebegin", button);
+  if (shareHost) {
+    shareHost.appendChild(button);
+  }
 
   // Появляется только после успешного построения хотя бы одного варианта пути.
   function updateShareButtonVisibility() {
@@ -89,6 +102,10 @@
     }
   });
 })();
+
+
+
+
 
 
 

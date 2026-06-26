@@ -3,16 +3,25 @@
 addressForm.addEventListener("submit", (event) => {
   event.preventDefault();
   clearTimeout(addressSearchTimer);
-  void searchAddressSuggestions(addressInput.value.trim());
+  const query = addressInput.value.trim();
+
+  if (!query) {
+    clearStartPoint();
+    return;
+  }
+
+  void searchAddressSuggestions(query);
 });
 // Автоподсказки запускаются после короткой паузы, чтобы не делать запрос на каждую букву.
 addressInput.addEventListener("input", () => {
   clearTimeout(addressSearchTimer);
   clearAddressSuggestions();
+  updateAddressClearVisibility();
 
   const query = addressInput.value.trim();
 
   if (query.length < 1) {
+    clearStartPoint();
     return;
   }
 
@@ -70,13 +79,35 @@ document.addEventListener(
 );
 
 mobileSheetToggle?.addEventListener("click", () => {
+  // Если точка ещё не выбрана, панель уже показывает всё полезное: заголовок и поиск.
+  // Не раскрываем её в пустое состояние, чтобы верстка не прыгала и не искривлялась.
+  if (!startMarker) {
+    sidebar.classList.remove("is-mobile-expanded");
+    mobileSheetToggle.setAttribute("aria-expanded", "false");
+    return;
+  }
+
   const isExpanded = !sidebar.classList.contains("is-mobile-expanded");
 
   sidebar.classList.toggle("is-mobile-expanded", isExpanded);
   mobileSheetToggle.setAttribute("aria-expanded", String(isExpanded));
-  mobileSheetToggle.lastChild.textContent = "Панель маршрута";
+  mobileSheetToggle.lastChild.textContent = "Введите название улицы или места";
   setTimeout(() => map.invalidateSize(), 220);
 });
+// На телефонах Leaflet слушает жесты на всей карте. Если свайп начинается
+// на нижней панели, останавливаем всплытие события, чтобы вместо карты
+// прокручивалась сама панель маршрута.
+["click", "pointerdown", "pointermove", "touchstart", "touchmove", "wheel"].forEach(
+  (eventName) => {
+    sidebar.addEventListener(
+      eventName,
+      (event) => {
+        event.stopPropagation();
+      },
+      { passive: true },
+    );
+  },
+);
 
 addSignToggle.addEventListener("click", () => {
   setManualSignMode(!isAddingManualSign);
@@ -106,13 +137,25 @@ map.on("click", (event) => {
     return;
   }
 
+  void updateAddressInputFromPoint(event.latlng);
   buildRoute(event.latlng);
 });
 
-// Полностью очищает пользовательскую точку и результат предыдущего построения.
-clearStartButton.addEventListener("click", () => {
+// Полностью очищает пользовательскую точку, адрес в строке поиска и результат маршрута.
+function clearStartPoint() {
   if (activeRouteRequest) {
     activeRouteRequest.abort();
+    activeRouteRequest = null;
+  }
+
+  if (activeAddressRequest) {
+    activeAddressRequest.abort();
+    activeAddressRequest = null;
+  }
+
+  if (activeReverseAddressRequest) {
+    activeReverseAddressRequest.abort();
+    activeReverseAddressRequest = null;
   }
 
   if (startMarker) {
@@ -120,6 +163,8 @@ clearStartButton.addEventListener("click", () => {
     startMarker = null;
   }
 
+  addressInput.value = "";
+  clearAddressSuggestions();
   clearRouteLayers();
   clearSafetyMarkers();
   clearManualSigns();
@@ -128,11 +173,15 @@ clearStartButton.addEventListener("click", () => {
   routeReasonsElement.hidden = true;
   optionsSection.hidden = true;
   updateManualSignsPanelVisibility();
+  updateAddressClearVisibility();
+  document.body.classList.remove("has-start-point");
   setProgress("idle");
-  setStatus(
-    "Точка отправления удалена. Выберите новое место на карте или введите адрес.",
-  );
-  clearStartButton.hidden = true;
+  setStatus("Введите адрес или нажмите на любое место карты.");
+}
+
+addressClearButton?.addEventListener("click", () => {
+  clearStartPoint();
+  addressInput.focus({ preventScroll: true });
 });
 
 // Формирует ссылку для QR-кода: сохраняет стартовую точку и выбранный вариант.
@@ -192,3 +241,9 @@ async function restoreSharedRouteFromUrl() {
 window.addEventListener("load", () => {
   void restoreSharedRouteFromUrl();
 });
+
+
+
+
+
+

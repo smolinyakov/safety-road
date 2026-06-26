@@ -2,7 +2,7 @@
 .project-hero {
   position: relative;
   z-index: 10;
-  margin: -10px -8px 28px;
+  margin: 20px 24px 18px;
   padding: 24px 20px 20px;
   overflow: visible;
   background: linear-gradient(145deg, #eef5ff 0%, #f8fbff 58%, #e7f0ff 100%);
@@ -213,3 +213,4 @@
   color: #5f6f87;
   font-size: 12px;
 }
+

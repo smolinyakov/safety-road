@@ -79,10 +79,10 @@ const optionsSection = document.getElementById("route-options-section");
 const optionsElement = document.getElementById("route-options");
 const addressForm = document.getElementById("address-form");
 const addressInput = document.getElementById("address-input");
+const addressClearButton = document.getElementById("address-clear");
 const suggestionsElement = document.getElementById("address-suggestions");
 const routeProgressElement = document.getElementById("route-progress");
 const routeReasonsElement = document.getElementById("route-reasons");
-const clearStartButton = document.getElementById("clear-start");
 const schoolPickerButton = document.getElementById("school-picker-button");
 const schoolPickerPanel = document.getElementById("school-picker-panel");
 const schoolSearchInput = document.getElementById("school-search-input");
@@ -115,6 +115,7 @@ let activeAddressRequest;
 let routeVariants = [];
 let selectedRouteIndex = 0;
 let addressSearchTimer;
+let activeReverseAddressRequest;
 let currentProgressStage = "idle";
 let isAddingManualSign = false;
 let selectedManualSignType = "crossing";
@@ -125,3 +126,5 @@ let shouldRestoreManualSignsFromUrl = false;
 function normalizeOsmText(value) {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
+
+
