@@ -1,0 +1,158 @@
+﻿/* Панель ручного добавления дорожных знаков. */
+.manual-signs-panel {
+  margin-top: 22px;
+}
+
+.add-sign-toggle,
+.cancel-sign-mode,
+.clear-manual-signs,
+.sign-option {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 10px;
+  color: #263447;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dce9fb;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.add-sign-toggle {
+  width: 100%;
+  padding: 11px 13px;
+  color: #fff;
+  background: var(--blue);
+  border: 0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.add-sign-toggle.is-active {
+  background: #185abc;
+}
+
+.sign-picker {
+  display: grid;
+  gap: 9px;
+  margin-top: 9px;
+  padding: 10px;
+  background: #f8fbff;
+  border: 1px solid #dce9fb;
+  border-radius: 12px;
+}
+
+.sign-picker[hidden] {
+  display: none;
+}
+
+.sign-picker p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sign-options {
+  display: grid;
+  gap: 7px;
+}
+
+.sign-option:hover,
+.sign-option.is-selected {
+  color: #185abc;
+  background: #e8f0fe;
+  border-color: #abc9fb;
+}
+
+.sign-option img,
+.sign-option-icon {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+}
+
+.sign-option-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sign-option-icon--speed {
+  color: #202124;
+  background: #fff;
+  border: 3px solid #d93025;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.sign-option-icon--danger {
+  position: relative;
+  background: #e53935;
+  border-radius: 2px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  font-size: 0;
+}
+
+.sign-option-icon--danger::before {
+  position: absolute;
+  inset: 4px 5px 3px;
+  background: #fff;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.sign-option-icon--danger::after {
+  position: absolute;
+  inset: 6px 0 2px;
+  display: grid;
+  color: #111;
+  content: "!";
+  place-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sign-picker-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cancel-sign-mode,
+.clear-manual-signs {
+  justify-self: start;
+  padding: 0;
+  color: #5f6368;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentcolor;
+  font-size: 12px;
+}
+
+.cancel-sign-mode:hover,
+.clear-manual-signs:hover {
+  color: #c5221f;
+}
+
+.manual-sign-remove {
+  margin-top: 8px;
+  padding: 6px 8px;
+  color: #c5221f;
+  cursor: pointer;
+  background: #fce8e6;
+  border: 0;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}

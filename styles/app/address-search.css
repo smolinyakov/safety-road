@@ -1,0 +1,101 @@
+﻿/* Поиск адреса и динамические подсказки геокодера. */
+.address-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.address-form input {
+  min-width: 0;
+  height: 42px;
+  flex: 1;
+  padding: 0 11px;
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-bottom-color: var(--line);
+  border-radius: 8px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 13px;
+}
+
+.address-form input:focus {
+  outline: 0;
+  border-color: var(--blue);
+  box-shadow: none;
+}
+
+.address-form button {
+  height: 42px;
+  padding: 0 13px;
+  color: #fff;
+  cursor: pointer;
+  background: var(--blue);
+  border: 0;
+  border-bottom: 0;
+  border-radius: 8px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.address-form button:hover {
+  background: #1765cc;
+}
+
+.address-hint {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.address-suggestions {
+  display: flex;
+  max-height: 220px;
+  margin-top: 0px;
+  overflow-y: center;
+  background: #fff;
+  /* border: 1px solid var(--line); */
+  /* border-radius: 8px; */
+  /* box-shadow: 0 2px 6px rgb(60 64 67 / 16%); */
+}
+
+.address-suggestion {
+  padding: 10px 11px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 0;
+  border-bottom: 1px solid #edf0f2;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.address-suggestion:last-child {
+  border-bottom: 0;
+}
+
+.address-suggestion:hover,
+.address-suggestion:focus {
+  background: #e8f0fe;
+  outline: 0;
+}
+
+.address-suggestion mark {
+  padding: 0;
+  color: inherit;
+  background: #fef7e0;
+  font-weight: 800;
+}
+
+
+

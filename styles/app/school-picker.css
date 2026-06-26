@@ -1,0 +1,215 @@
+﻿/* Hero-блок и выбор школы. */
+.project-hero {
+  position: relative;
+  z-index: 10;
+  margin: -10px -8px 28px;
+  padding: 24px 20px 20px;
+  overflow: visible;
+  background: linear-gradient(145deg, #eef5ff 0%, #f8fbff 58%, #e7f0ff 100%);
+  border: 1px solid #dce9fb;
+  border-radius: 18px;
+}
+
+.project-hero::after {
+  position: absolute;
+  top: -28px;
+  right: -20px;
+  width: 150px;
+  height: 150px;
+  background: rgb(26 115 232 / 10%);
+  border-radius: 50%;
+  content: "";
+}
+
+.project-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  display: inline-flex;
+  margin: 0 0 12px;
+  padding: 4px 8px;
+  color: #185abc;
+  background: #dbeaff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 320px;
+  margin: 14px 0 20px;
+  color: #52627a;
+  font-size: 14px;
+  line-height: 1.52;
+}
+
+.school-picker {
+  position: relative;
+}
+
+.school-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 13px;
+  background: rgb(255 255 255 / 86%);
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgb(44 96 167 / 10%);
+  backdrop-filter: blur(6px);
+}
+
+.school-card-button {
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+  transition: 0.18s ease;
+}
+
+.school-card-button:hover,
+.school-card-button:focus-visible {
+  background: #fff;
+  border-color: #c8dcfb;
+  box-shadow: 0 10px 24px rgb(44 96 167 / 16%);
+  outline: 0;
+}
+
+.school-card-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.school-arrow {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  place-items: center;
+}
+
+.school-arrow span {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--blue);
+  border-bottom: 2px solid var(--blue);
+  transform: translateY(3px) rotate(45deg);
+}
+
+.school-card-button[aria-expanded="true"] .school-arrow span {
+  transform: translateY(6px) rotate(225deg);
+}
+
+.school-picker-panel {
+  position: absolute;
+  z-index: 50;
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  background: rgb(255 255 255 / 98%);
+  border: 1px solid #dce9fb;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px rgb(44 96 167 / 22%);
+  backdrop-filter: blur(8px);
+}
+
+.school-picker-panel[hidden] {
+  display: none;
+}
+
+.school-search-input {
+  width: 100%;
+  padding: 10px 11px;
+  color: var(--ink);
+  background: #f8fbff;
+  border: 1px solid #dce9fb;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.school-search-input:focus {
+  outline: 2px solid #d2e3fc;
+  border-color: var(--blue);
+}
+
+.school-list {
+  display: grid;
+  max-height: min(360px, 52vh);
+  overflow-y: auto;
+}
+
+.school-option {
+  display: grid;
+  gap: 2px;
+  padding: 10px 11px;
+  color: #263447;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.school-option strong {
+  font-size: 13px;
+}
+
+.school-option span {
+  color: #687891;
+  font-size: 12px;
+}
+
+.school-option:hover,
+.school-option:focus-visible,
+.school-option.is-selected {
+  background: #e8f0fe;
+  outline: 0;
+}
+
+.school-option-empty {
+  padding: 12px 10px;
+  color: #687891;
+  font-size: 12px;
+}
+
+.school-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  background: linear-gradient(145deg, #2f80ed, #1769d2);
+  border: 3px solid #dbeaff;
+  border-radius: 50%;
+  box-shadow: 0 4px 9px rgb(26 115 232 / 22%);
+  place-items: center;
+  font-size: 16px;
+}
+
+.school-icon svg {
+  display: block;
+}
+
+.school-card strong,
+.school-card span {
+  display: block;
+}
+
+.school-card span {
+  margin-top: 2px;
+  color: #5f6f87;
+  font-size: 12px;
+}

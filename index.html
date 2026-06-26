@@ -1,179 +1,310 @@
 ﻿<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Безопасный путь в школу — прототип</title>
-  <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Безопасный путь в школу — прототип</title>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <link rel="stylesheet" href="styles/style.css" />
-</head>
-<body>
-  <!-- Приложение делится на левую панель управления и область карты. -->
-  <div class="app">
-    <!-- Здесь пользователь выбирает стартовую точку и вариант маршрута. -->
-    <aside class="sidebar">
-      <!-- Презентационный блок: кратко объясняет назначение сервиса и школу. -->
-      <header class="project-hero">
-        <p class="eyebrow">Учебный прототип</p>
-        <h1>Безопасный путь<br />в школу</h1>
-        <p class="lead">
-          Укажите адрес или выберите стартовую точку на карте — сервис построит
-          пешеходные варианты пути до школы.
-        </p>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="styles/app/base-layout.css" />
+    <link rel="stylesheet" href="styles/app/school-picker.css" />
+    <link rel="stylesheet" href="styles/app/routes-status.css" />
+    <link rel="stylesheet" href="styles/app/map-markers-popups.css" />
+    <link rel="stylesheet" href="styles/app/address-search.css" />
+    <link rel="stylesheet" href="styles/app/manual-signs.css" />
+    <link rel="stylesheet" href="styles/app/mobile.css" />
+  </head>
+  <body>
+    <!-- Приложение делится на левую панель управления и область карты. -->
+    <div class="app">
+      <!-- Здесь пользователь выбирает стартовую точку и вариант маршрута. -->
+      <aside class="sidebar">
+        <button
+          class="mobile-sheet-toggle"
+          id="mobile-sheet-toggle"
+          type="button"
+          aria-expanded="false"
+        >
+          <span></span>
+          Панель маршрута
+        </button>
+        <!-- Презентационный блок: кратко объясняет назначение сервиса и школу. -->
+        <header class="project-hero">
+          <p class="eyebrow">Учебный прототип</p>
+          <h1>Безопасный путь<br />в школу</h1>
+          <p class="lead">
+            Укажите адрес или выберите стартовую точку на карте — сервис
+            построит пешеходные варианты пути до школы.
+          </p>
 
-        <section class="school-picker" aria-label="Выбор школы">
-          <button class="school-card school-card-button" id="school-picker-button" type="button" aria-expanded="false" aria-controls="school-picker-panel">
-            <div class="school-icon" aria-hidden="true">
-              <svg width="25" height="25" viewBox="0 0 26 26" focusable="false">
-                <path d="M4 21.5h18" stroke="#dbeaff" stroke-width="2" stroke-linecap="round"/>
-                <path d="M6 11.2 13 6l7 5.2v10.3H6V11.2Z" fill="#fff"/>
-                <path d="M4.8 11.5 13 5.3l8.2 6.2" fill="none" stroke="#dbeaff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10.2 21.5v-5.4h5.6v5.4" fill="#1769d2" opacity="0.95"/>
-                <path d="M8.1 12.6h3.1v2.7H8.1v-2.7Zm6.7 0h3.1v2.7h-3.1v-2.7Z" fill="#8ab4f8"/>
-                <path d="M13 5.3V2.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
-                <path d="M13.8 3.1h4.2l-1 1.4 1 1.4h-4.2V3.1Z" fill="#fdd663"/>
-              </svg>
+          <section class="school-picker" aria-label="Выбор школы">
+            <button
+              class="school-card school-card-button"
+              id="school-picker-button"
+              type="button"
+              aria-expanded="false"
+              aria-controls="school-picker-panel"
+            >
+              <div class="school-icon" aria-hidden="true">
+                <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 26 26"
+                  focusable="false"
+                >
+                  <path
+                    d="M4 21.5h18"
+                    stroke="#dbeaff"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <path d="M6 11.2 13 6l7 5.2v10.3H6V11.2Z" fill="#fff" />
+                  <path
+                    d="M4.8 11.5 13 5.3l8.2 6.2"
+                    fill="none"
+                    stroke="#dbeaff"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10.2 21.5v-5.4h5.6v5.4"
+                    fill="#1769d2"
+                    opacity="0.95"
+                  />
+                  <path
+                    d="M8.1 12.6h3.1v2.7H8.1v-2.7Zm6.7 0h3.1v2.7h-3.1v-2.7Z"
+                    fill="#8ab4f8"
+                  />
+                  <path
+                    d="M13 5.3V2.8"
+                    stroke="#fff"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M13.8 3.1h4.2l-1 1.4 1 1.4h-4.2V3.1Z"
+                    fill="#fdd663"
+                  />
+                </svg>
+              </div>
+              <div class="school-card-text">
+                <strong id="selected-school-name">МБОУ СОШ №85</strong>
+                <span id="selected-school-address"
+                  >ул. Малиновского, 19 · Хабаровск</span
+                >
+              </div>
+              <span class="school-arrow" aria-hidden="true"><span></span></span>
+            </button>
+
+            <div class="school-picker-panel" id="school-picker-panel" hidden>
+              <label class="visually-hidden" for="school-search-input"
+                >Поиск школы или лицея</label
+              >
+              <input
+                class="school-search-input"
+                id="school-search-input"
+                type="search"
+                placeholder="Найти школу или лицей"
+                autocomplete="off"
+              />
+              <div
+                class="school-list"
+                id="school-list"
+                role="listbox"
+                aria-label="Школы и лицеи Хабаровска"
+              ></div>
             </div>
-            <div class="school-card-text">
-              <strong id="selected-school-name">МБОУ СОШ №85</strong>
-              <span id="selected-school-address">ул. Малиновского, 19 · Хабаровск</span>
-            </div>
-            <span class="school-arrow" aria-hidden="true"><span></span></span>
-          </button>
-
-          <div class="school-picker-panel" id="school-picker-panel" hidden>
-            <label class="visually-hidden" for="school-search-input">Поиск школы или лицея</label>
+          </section>
+        </header>
+        <section class="address-section">
+          <h2>Точка отправления</h2>
+          <!-- Поле поддерживает поиск по кнопке и динамические подсказки во время ввода. -->
+          <form class="address-form" id="address-form">
+            <label class="visually-hidden" for="address-input"
+              >Адрес в Хабаровске</label
+            >
             <input
-              class="school-search-input"
-              id="school-search-input"
+              id="address-input"
               type="search"
-              placeholder="Найти школу или лицей"
-              autocomplete="off"
+              placeholder="Например: ул. Панфиловцев, 20"
+              autocomplete="street-address"
+              required
             />
-            <div class="school-list" id="school-list" role="listbox" aria-label="Школы и лицеи Хабаровска"></div>
+            <button type="submit">Найти</button>
+          </form>
+          <div
+            class="address-suggestions"
+            id="address-suggestions"
+            role="listbox"
+            hidden
+          ></div>
+          <p class="address-hint">Или кликните по карте.</p>
+        </section>
+
+        <section>
+          <h2>Построение маршрута</h2>
+          <div class="info-card" aria-live="polite">
+            <p id="route-status">
+              Введите адрес или нажмите на любое место карты.
+            </p>
+            <div class="route-progress" id="route-progress" hidden>
+              <span data-progress="point">1. Точка</span>
+              <span data-progress="route">2. Маршрут</span>
+              <span data-progress="score">3. Оценка</span>
+            </div>
+            <ul class="route-reasons" id="route-reasons" hidden></ul>
+            <button class="clear-start" id="clear-start" type="button" hidden>
+              Убрать точку
+            </button>
           </div>
         </section>
-      </header>
-<section>
-        <h2>Точка отправления</h2>
-        <!-- Поле поддерживает поиск по кнопке и динамические подсказки во время ввода. -->
-        <form class="address-form" id="address-form">
-          <label class="visually-hidden" for="address-input">Адрес в Хабаровске</label>
-          <input
-            id="address-input"
-            type="search"
-            placeholder="Например: ул. Панфиловцев, 20"
-            autocomplete="street-address"
-            required
-          />
-          <button type="submit">Найти</button>
-        </form>
-        <div class="address-suggestions" id="address-suggestions" role="listbox" hidden></div>
-        <p class="address-hint">Или кликните по карте.</p>
-      </section>
 
-      <section>
-        <h2>Построение маршрута</h2>
-        <div class="info-card" aria-live="polite">
-          <p id="route-status">Введите адрес или нажмите на любое место карты.</p>
-          <div class="route-progress" id="route-progress" hidden>
-            <span data-progress="point">1. Точка</span>
-            <span data-progress="route">2. Маршрут</span>
-            <span data-progress="score">3. Оценка</span>
+        <section
+          class="manual-signs-panel"
+          aria-label="Ручное добавление дорожных знаков"
+          hidden
+        >
+          <h2>Дорожные знаки</h2>
+          <button class="add-sign-toggle" id="add-sign-toggle" type="button">
+            Добавить знак
+          </button>
+          <div class="sign-picker" id="sign-picker" hidden>
+            <p>Выберите тип знака.</p>
+            <div class="sign-options" role="listbox" aria-label="Тип знака">
+              <button
+                class="sign-option is-selected"
+                type="button"
+                data-sign-type="crossing"
+              >
+                <img src="images/RU_road_sign_5.19.2.svg" alt="" />
+                <span>Пешеходный переход</span>
+              </button>
+              <button class="sign-option" type="button" data-sign-type="light">
+                <span class="sign-option-icon" aria-hidden="true">🚦</span>
+                <span>Светофор</span>
+              </button>
+              <button class="sign-option" type="button" data-sign-type="speed">
+                <span
+                  class="sign-option-icon sign-option-icon--speed"
+                  aria-hidden="true"
+                  >40</span
+                >
+                <span>Ограничение 40</span>
+              </button>
+              <button class="sign-option" type="button" data-sign-type="danger">
+                <span
+                  class="sign-option-icon sign-option-icon--danger"
+                  aria-hidden="true"
+                  >!</span
+                >
+                <span>Опасный участок дороги</span>
+              </button>
+            </div>
+            <div class="sign-picker-actions">
+              <button
+                class="cancel-sign-mode"
+                id="cancel-sign-mode"
+                type="button"
+              >
+                Отменить
+              </button>
+              <button
+                class="clear-manual-signs"
+                id="clear-manual-signs"
+                type="button"
+              >
+                Очистить все знаки
+              </button>
+            </div>
           </div>
-          <ul class="route-reasons" id="route-reasons" hidden></ul>
-          <button class="clear-start" id="clear-start" type="button" hidden>Убрать точку</button>
+        </section>
+
+        <!-- Блок скрыт до первого успешного построения маршрута. -->
+        <section id="route-options-section" hidden>
+          <h2>Варианты маршрута</h2>
+          <div class="routes" id="route-options"></div>
+        </section>
+
+        <div class="legend" aria-label="Легенда карты">
+          <div class="legend-row"><i class="dot green"></i>рекомендуемый</div>
+          <div class="legend-row">
+            <i class="dot orange"></i>есть участки внимания
+          </div>
+          <div class="legend-row">
+            <i class="dot red"></i>менее предпочтительный
+          </div>
         </div>
+
+        <details class="risk-help">
+          <summary>Как рассчитывается оценка?</summary>
+          <p>
+            Это учебная оценка: сравниваются длина пути, число поворотов и
+            пересечений. Она не заменяет сведения о ДТП или проверку маршрута
+            взрослыми.
+          </p>
+        </details>
+      </aside>
+
+      <!-- Leaflet создаёт карту внутри элемента с id="map". -->
+      <main class="map-area">
+        <div id="map"></div>
+        <div class="map-label">Кликните по карте или введите адрес слева.</div>
+        <!--  -->
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts/schools-data.js"></script>
+    <script src="scripts/app/state-and-map.js"></script>
+    <script src="scripts/app/schools.js"></script>
+    <script src="scripts/app/route-utils.js"></script>
+    <script src="scripts/app/manual-signs.js"></script>
+    <script src="scripts/app/safety-objects.js"></script>
+    <script src="scripts/app/route-rendering.js"></script>
+    <script src="scripts/app/address-search.js"></script>
+    <script src="scripts/app/events-and-share.js"></script>
+    <div class="route-share-modal" id="shareRouteModal" hidden>
+      <section
+        class="route-share-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shareRouteTitle"
+      >
+        <button
+          class="route-share-close"
+          type="button"
+          aria-label="Закрыть окно"
+          data-close-share-modal
+        >
+          ×
+        </button>
+        <h2 id="shareRouteTitle">Поделиться маршрутом</h2>
+        <p>Отсканируйте QR-код или откройте ссылку на другом устройстве.</p>
+        <div
+          class="route-qr-code"
+          id="routeQrCode"
+          aria-label="QR-код маршрута"
+        ></div>
+        <a
+          class="route-share-link"
+          id="shareRouteLink"
+          href="#"
+          target="_blank"
+          rel="noopener"
+        ></a>
+        <button class="route-share-copy" id="copyRouteLink" type="button">
+          Скопировать ссылку
+        </button>
       </section>
+    </div>
 
-      <section class="manual-signs-panel" aria-label="Ручное добавление дорожных знаков" hidden>
-        <h2>Дорожные знаки</h2>
-        <button class="add-sign-toggle" id="add-sign-toggle" type="button">Добавить знак</button>
-        <div class="sign-picker" id="sign-picker" hidden>
-          <p>Выберите тип знака.</p>
-          <div class="sign-options" role="listbox" aria-label="Тип знака">
-            <button class="sign-option is-selected" type="button" data-sign-type="crossing"><img src="images/RU_road_sign_5.19.2.svg" alt="" /> <span>Пешеходный переход</span></button>
-            <button class="sign-option" type="button" data-sign-type="light"><span class="sign-option-icon" aria-hidden="true">🚦</span> <span>Светофор</span></button>
-            <button class="sign-option" type="button" data-sign-type="speed"><span class="sign-option-icon sign-option-icon--speed" aria-hidden="true">40</span> <span>Ограничение 40</span></button>
-            <button class="sign-option" type="button" data-sign-type="danger"><span class="sign-option-icon sign-option-icon--danger" aria-hidden="true">!</span> <span>Опасный участок дороги</span></button>
-          </div>
-          <div class="sign-picker-actions">
-            <button class="cancel-sign-mode" id="cancel-sign-mode" type="button">Отменить</button>
-            <button class="clear-manual-signs" id="clear-manual-signs" type="button">Очистить все знаки</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Блок скрыт до первого успешного построения маршрута. -->
-      <section id="route-options-section" hidden>
-        <h2>Варианты маршрута</h2>
-        <div class="routes" id="route-options"></div>
-      </section>
-
-      <div class="legend" aria-label="Легенда карты">
-        <div class="legend-row"><i class="dot green"></i>рекомендуемый</div>
-        <div class="legend-row"><i class="dot orange"></i>есть участки внимания</div>
-        <div class="legend-row"><i class="dot red"></i>менее предпочтительный</div>
-      </div>
-
-      <details class="risk-help">
-        <summary>Как рассчитывается оценка?</summary>
-        <p>Это учебная оценка: сравниваются длина пути, число поворотов и пересечений. Она не заменяет сведения о ДТП или проверку маршрута взрослыми.</p>
-      </details>
-    </aside>
-
-    <!-- Leaflet создаёт карту внутри элемента с id="map". -->
-    <main class="map-area">
-      <div id="map"></div>
-      <div class="map-label">Кликните по карте или введите адрес слева.</div><!--  -->
-    </main>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="scripts/schools-data.js"></script>
-  <script src="scripts/app.js"></script>
-  <div class="route-share-modal" id="shareRouteModal" hidden>
-    <section class="route-share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareRouteTitle">
-      <button class="route-share-close" type="button" aria-label="Закрыть окно" data-close-share-modal>×</button>
-      <h2 id="shareRouteTitle">Поделиться маршрутом</h2>
-      <p>Отсканируйте QR-код или откройте ссылку на другом устройстве.</p>
-      <div class="route-qr-code" id="routeQrCode" aria-label="QR-код маршрута"></div>
-      <a class="route-share-link" id="shareRouteLink" href="#" target="_blank" rel="noopener"></a>
-      <button class="route-share-copy" id="copyRouteLink" type="button">Скопировать ссылку</button>
-    </section>
-  </div>
-
-  <link rel="stylesheet" href="styles/share.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="scripts/share.js"></script>
-</body>
+    <link rel="stylesheet" href="styles/share.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="scripts/share.js"></script>
+  </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

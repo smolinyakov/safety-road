@@ -1,0 +1,138 @@
+﻿/* Карта Leaflet, popup и визуальные дорожные знаки на карте. */
+.map-area {
+  position: relative;
+  min-height: 540px;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  background: #e8eaed;
+}
+
+.map-label {
+  position: absolute;
+  z-index: 500;
+  top: 20px;
+  right: 20px;
+  max-width: 280px;
+  padding: 12px 14px;
+  color: #3c4043;
+  background: rgb(255 255 255 / 96%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(60 64 67 / 24%);
+  font-size: 12px;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font: 13px / 1.35 inherit;
+}
+
+.leaflet-popup-content strong,
+.safety-popup > strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #202124;
+}
+
+.leaflet-popup-content span {
+  color: #5f6368;
+  font-size: 12px;
+}
+
+.popup-title {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 800;
+}
+
+.safety-sign {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  background: #fff;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 3px 10px rgb(32 33 36 / 28%);
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.safety-sign--warning {
+  background: #fff3cd;
+}
+.safety-sign--light {
+  background: #e6f4ea;
+}
+
+.safety-photo-placeholder {
+  display: grid;
+  width: 150px;
+  min-height: 96px;
+  padding: 12px;
+  color: #5f6368;
+  background: linear-gradient(145deg, #edf2f7, #dfe7f1);
+  border-radius: 8px;
+  place-items: center;
+  text-align: center;
+}
+
+.safety-photo-placeholder span {
+  font-size: 28px;
+}
+.safety-photo-placeholder small {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.safety-sign--speed {
+  color: #202124;
+  background: #fff;
+  border: 4px solid #d93025;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.safety-sign--danger {
+  position: relative;
+  width: 34px;
+  height: 30px;
+  background: #e53935;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: 0 2px 7px rgb(32 33 36 / 20%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  font-size: 0;
+}
+
+.safety-sign--danger::before {
+  position: absolute;
+  inset: 5px 6px 4px;
+  background: #fff;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.safety-sign--danger::after {
+  position: absolute;
+  inset: 8px 0 3px;
+  display: grid;
+  color: #111;
+  content: "!";
+  place-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.map-area.is-placing-sign #map {
+  cursor: crosshair;
+}
