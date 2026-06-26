@@ -102,11 +102,13 @@
 }
 
 .address-suggestions {
-  display: flex;
+  display: grid;
   max-height: 220px;
-  margin-top: 0px;
-  overflow-y: center;
+  margin-top: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: #fff;
+  -webkit-overflow-scrolling: touch;
   /* border: 1px solid var(--line); */
   /* border-radius: 8px; */
   /* box-shadow: 0 2px 6px rgb(60 64 67 / 16%); */

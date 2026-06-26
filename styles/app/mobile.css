@@ -188,9 +188,10 @@
   }
 
   body:not(.has-start-point) .sidebar.is-mobile-expanded {
-    height: auto;
+    height: min(68dvh, 560px);
     max-height: calc(100dvh - var(--mobile-safe-top) - 86px);
-    overflow-y: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   .sidebar.is-mobile-expanded {
     --mobile-sheet-current-height: min(68dvh, 560px);
@@ -292,15 +293,21 @@
 
   .address-suggestions {
     display: grid;
-    max-height: min(28dvh, 220px);
+    max-height: min(42dvh, 360px);
     margin-top: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;
+    touch-action: pan-y;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgb(15 27 45 / 14%);
+    -webkit-overflow-scrolling: touch;
   }
 
+  .sidebar.is-mobile-address-searching > .route-build-section,
+  .sidebar.is-mobile-address-searching > .manual-signs-panel,
+  .sidebar.is-mobile-address-searching > #route-options-section,
+  .sidebar.is-mobile-address-searching > .share-button-host,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .route-build-section,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .manual-signs-panel,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > #route-options-section,

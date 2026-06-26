@@ -10,6 +10,7 @@ addressForm.addEventListener("submit", (event) => {
     return;
   }
 
+  openMobileSheetForAddressSearch();
   void searchAddressSuggestions(query);
 });
 // Автоподсказки запускаются после короткой паузы, чтобы не делать запрос на каждую букву.
@@ -25,9 +26,16 @@ addressInput.addEventListener("input", () => {
     return;
   }
 
+  openMobileSheetForAddressSearch();
   addressSearchTimer = setTimeout(() => {
     void searchAddressSuggestions(query);
   }, 300);
+});
+
+addressInput.addEventListener("focus", () => {
+  if (!startMarker && addressInput.value.trim()) {
+    openMobileSheetForAddressSearch();
+  }
 });
 // Стрелка в карточке школы раскрывает список школ и лицеев.
 schoolPickerButton.addEventListener("click", () => {
@@ -97,8 +105,28 @@ function getMobileSheetState() {
   return "collapsed";
 }
 
+function setMobileAddressSearchActive(isActive) {
+  if (!sidebar) return;
+  sidebar.classList.toggle("is-mobile-address-searching", Boolean(isActive));
+}
+
+function hasActiveMobileAddressSearch() {
+  return Boolean(sidebar?.classList.contains("is-mobile-address-searching"));
+}
+
+function openMobileSheetForAddressSearch() {
+  if (!mobileSheetQuery.matches) return;
+
+  setMobileAddressSearchActive(true);
+  setMobileSheetState("expanded");
+}
+
+window.setMobileAddressSearchActive = setMobileAddressSearchActive;
+
 function normalizeMobileSheetState(state) {
-  return state === "expanded" && !startMarker ? "collapsed" : state;
+  return state === "expanded" && !startMarker && !hasActiveMobileAddressSearch()
+    ? "collapsed"
+    : state;
 }
 
 function updateMobileSheetAttachedControls(height) {
@@ -205,7 +233,8 @@ function getMobileSheetHeights() {
 }
 
 function clampMobileSheetHeight(height, heights) {
-  const maxHeight = startMarker ? heights.expanded : heights.collapsed;
+  const canExpand = startMarker || hasActiveMobileAddressSearch();
+  const maxHeight = canExpand ? heights.expanded : heights.collapsed;
   return Math.min(Math.max(height, heights.hidden), maxHeight);
 }
 
@@ -220,7 +249,7 @@ mobileSheetToggle?.addEventListener("click", () => {
     return;
   }
 
-  if (!startMarker) {
+  if (!startMarker && !hasActiveMobileAddressSearch()) {
     setMobileSheetState("collapsed");
     return;
   }
@@ -268,7 +297,8 @@ mobileSheetToggle?.addEventListener("pointermove", (event) => {
   sidebar.classList.remove("is-mobile-hidden");
   sidebar.classList.toggle(
     "is-mobile-expanded",
-    startMarker && nextHeight > heights.collapsed + 24,
+    (startMarker || hasActiveMobileAddressSearch()) &&
+      nextHeight > heights.collapsed + 24,
   );
   sidebar.style.height = `${nextHeight}px`;
   updateMobileSheetAttachedControls(nextHeight);
@@ -287,7 +317,7 @@ mobileSheetToggle?.addEventListener("pointerup", (event) => {
 
   if (height <= hiddenLimit) {
     targetState = "hidden";
-  } else if (startMarker && height >= expandedLimit) {
+  } else if ((startMarker || hasActiveMobileAddressSearch()) && height >= expandedLimit) {
     targetState = "expanded";
   }
 
@@ -383,6 +413,7 @@ function clearStartPoint() {
   }
 
   addressInput.value = "";
+  setMobileAddressSearchActive(false);
   clearAddressSuggestions();
   clearRouteLayers();
   clearSafetyMarkers();
@@ -458,7 +489,23 @@ async function restoreSharedRouteFromUrl() {
   }
 }
 
+function disableAddressInputCache() {
+  addressInput.setAttribute("autocomplete", "off");
+  addressInput.setAttribute("autocapitalize", "off");
+  addressInput.setAttribute("autocorrect", "off");
+  addressInput.setAttribute("spellcheck", "false");
+
+  if (!new URLSearchParams(window.location.search).has("start")) {
+    addressInput.value = "";
+    clearAddressSuggestions();
+    updateAddressClearVisibility();
+  }
+}
+
+window.addEventListener("pageshow", disableAddressInputCache);
+
 window.addEventListener("load", () => {
+  disableAddressInputCache();
   void restoreSharedRouteFromUrl();
 });
 

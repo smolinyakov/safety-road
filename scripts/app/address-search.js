@@ -225,6 +225,7 @@ function selectAddress(place) {
   addressInput.value = formatReadableAddress(place) || place.display_name.split(",").slice(0, 3).join(",");
   updateAddressClearVisibility();
   clearAddressSuggestions();
+  window.setMobileAddressSearchActive?.(false);
   map.setView(point, 16);
   buildRoute(point);
 }
