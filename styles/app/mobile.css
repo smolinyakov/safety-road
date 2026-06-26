@@ -7,6 +7,10 @@
     --mobile-school-height: 58px;
     --mobile-picker-height: clamp(190px, 34dvh, 280px);
     --mobile-collapsed-sheet: 126px;
+    --mobile-sheet-handle-height: 54px;
+    --mobile-hidden-sheet: calc(var(--mobile-sheet-handle-height) + var(--mobile-safe-bottom));
+    --mobile-sheet-share-gap: 14px;
+    --mobile-sheet-current-height: calc(var(--mobile-collapsed-sheet) + var(--mobile-safe-bottom));
   }
 
   html,
@@ -164,7 +168,23 @@
     border-radius: 22px 22px 0 0;
     box-shadow: 0 -12px 34px rgb(15 27 45 / 18%);
     transform: none;
+    transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar.is-mobile-dragging {
+    transition: none;
+  }
+
+  .sidebar.is-mobile-snapping {
+    transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sidebar.is-mobile-hidden {
+    --mobile-sheet-current-height: var(--mobile-hidden-sheet);
+    height: var(--mobile-hidden-sheet);
+    padding-bottom: var(--mobile-safe-bottom);
+    overflow: hidden;
   }
 
   body:not(.has-start-point) .sidebar.is-mobile-expanded {
@@ -173,6 +193,7 @@
     overflow-y: visible;
   }
   .sidebar.is-mobile-expanded {
+    --mobile-sheet-current-height: min(68dvh, 560px);
     height: min(68dvh, 560px);
     max-height: calc(100dvh - var(--mobile-safe-top) - 86px);
     padding: 8px 12px calc(14px + var(--mobile-safe-bottom));
@@ -194,7 +215,8 @@
     font-size: 14px;
     font-weight: 900;
     line-height: 1.05;
-    touch-action: manipulation;
+    touch-action: none;
+    user-select: none;
   }
 
   .mobile-sheet-toggle span {
@@ -283,6 +305,11 @@
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .manual-signs-panel,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > #route-options-section,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .share-button-host,
+  .sidebar.is-mobile-hidden > .address-section,
+  .sidebar.is-mobile-hidden > section:not(.address-section),
+  .sidebar.is-mobile-hidden > #route-options-section,
+  .sidebar.is-mobile-hidden > .legend,
+  .sidebar.is-mobile-hidden > .risk-help,
   .sidebar:not(.is-mobile-expanded) > section:not(.address-section),
   .sidebar:not(.is-mobile-expanded) > #route-options-section,
   .sidebar:not(.is-mobile-expanded) > .legend,

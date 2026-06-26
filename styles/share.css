@@ -308,7 +308,12 @@
     position: fixed;
     z-index: 1100;
     right: 14px;
-    bottom: calc(var(--mobile-collapsed-sheet, 126px) + env(safe-area-inset-bottom) + 18px);
+    bottom: calc(
+      var(
+        --mobile-sheet-current-height,
+        calc(var(--mobile-collapsed-sheet, 126px) + var(--mobile-safe-bottom, env(safe-area-inset-bottom)))
+      ) + var(--mobile-sheet-share-gap, 14px)
+    );
     display: grid;
     width: 50px;
     min-width: 50px;
@@ -324,6 +329,11 @@
     box-shadow: 0 6px 18px rgb(15 27 45 / 18%);
     place-items: center;
     font-size: 0;
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      bottom 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.2s ease;
   }
   .share-route-button .share-route-icon {
     display: grid;
@@ -352,8 +362,8 @@
     transform: none;
   }
 
-  .sidebar.is-mobile-expanded .share-route-button {
-    bottom: calc(min(68dvh, 560px) + env(safe-area-inset-bottom) + 18px);
+  .sidebar.is-mobile-dragging .share-route-button {
+    transition: none;
   }
 
   .share-route-button[hidden] {

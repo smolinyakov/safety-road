@@ -78,21 +78,240 @@ document.addEventListener(
   true,
 );
 
-mobileSheetToggle?.addEventListener("click", () => {
-  // Если точка ещё не выбрана, панель уже показывает всё полезное: заголовок и поиск.
-  // Не раскрываем её в пустое состояние, чтобы верстка не прыгала и не искривлялась.
-  if (!startMarker) {
-    sidebar.classList.remove("is-mobile-expanded");
-    mobileSheetToggle.setAttribute("aria-expanded", "false");
+const mobileSheetQuery = window.matchMedia("(max-width: 760px)");
+const mobileSheetSnapDuration = 320;
+const mobileSheetDrag = {
+  pointerId: null,
+  startY: 0,
+  startHeight: 0,
+  currentHeight: 0,
+  moved: false,
+  suppressClick: false,
+  heights: null,
+  snapTimer: null,
+};
+
+function getMobileSheetState() {
+  if (sidebar.classList.contains("is-mobile-hidden")) return "hidden";
+  if (sidebar.classList.contains("is-mobile-expanded")) return "expanded";
+  return "collapsed";
+}
+
+function normalizeMobileSheetState(state) {
+  return state === "expanded" && !startMarker ? "collapsed" : state;
+}
+
+function updateMobileSheetAttachedControls(height) {
+  if (!mobileSheetQuery.matches || !Number.isFinite(height)) return;
+
+  sidebar.style.setProperty("--mobile-sheet-current-height", `${height}px`);
+}
+
+function applyMobileSheetState(state) {
+  const normalizedState = normalizeMobileSheetState(state);
+
+  sidebar.classList.toggle("is-mobile-hidden", normalizedState === "hidden");
+  sidebar.classList.toggle("is-mobile-expanded", normalizedState === "expanded");
+  mobileSheetToggle.setAttribute(
+    "aria-expanded",
+    String(normalizedState === "expanded"),
+  );
+  mobileSheetToggle.lastChild.textContent =
+    normalizedState === "hidden"
+      ? "Открыть панель"
+      : "Введите название улицы или места";
+
+  return normalizedState;
+}
+
+function finishMobileSheetSnap(targetHeight) {
+  window.clearTimeout(mobileSheetDrag.snapTimer);
+  mobileSheetDrag.snapTimer = window.setTimeout(() => {
+    sidebar.classList.remove("is-mobile-snapping");
+    sidebar.style.removeProperty("height");
+    updateMobileSheetAttachedControls(targetHeight);
+    map.invalidateSize();
+  }, mobileSheetSnapDuration + 40);
+}
+
+function setMobileSheetState(state, options = {}) {
+  if (!sidebar || !mobileSheetToggle) return;
+
+  const normalizedState = normalizeMobileSheetState(state);
+
+  if (!mobileSheetQuery.matches) {
+    sidebar.style.removeProperty("height");
+    applyMobileSheetState(normalizedState);
+    setTimeout(() => map.invalidateSize(), 220);
     return;
   }
 
-  const isExpanded = !sidebar.classList.contains("is-mobile-expanded");
+  const shouldAnimate = options.animate !== false;
+  const startHeight = Number.isFinite(options.fromHeight)
+    ? options.fromHeight
+    : sidebar.getBoundingClientRect().height;
+  const targetHeight = measureMobileSheetHeight(normalizedState);
 
-  sidebar.classList.toggle("is-mobile-expanded", isExpanded);
-  mobileSheetToggle.setAttribute("aria-expanded", String(isExpanded));
-  mobileSheetToggle.lastChild.textContent = "Введите название улицы или места";
-  setTimeout(() => map.invalidateSize(), 220);
+  window.clearTimeout(mobileSheetDrag.snapTimer);
+  sidebar.classList.remove("is-mobile-dragging");
+  sidebar.style.height = `${startHeight}px`;
+  updateMobileSheetAttachedControls(startHeight);
+  applyMobileSheetState(normalizedState);
+
+  if (!shouldAnimate || Math.abs(startHeight - targetHeight) < 1) {
+    sidebar.classList.remove("is-mobile-snapping");
+    sidebar.style.removeProperty("height");
+    updateMobileSheetAttachedControls(targetHeight);
+    setTimeout(() => map.invalidateSize(), 220);
+    return;
+  }
+
+  sidebar.classList.add("is-mobile-snapping");
+  sidebar.getBoundingClientRect();
+
+  requestAnimationFrame(() => {
+    sidebar.style.height = `${targetHeight}px`;
+    updateMobileSheetAttachedControls(targetHeight);
+    finishMobileSheetSnap(targetHeight);
+  });
+}
+
+function measureMobileSheetHeight(state) {
+  const previousState = getMobileSheetState();
+  const previousHeight = sidebar.style.height;
+  const previousTransition = sidebar.style.transition;
+
+  sidebar.style.transition = "none";
+  sidebar.style.removeProperty("height");
+  sidebar.classList.toggle("is-mobile-hidden", state === "hidden");
+  sidebar.classList.toggle("is-mobile-expanded", state === "expanded");
+
+  const height = sidebar.getBoundingClientRect().height;
+
+  sidebar.classList.toggle("is-mobile-hidden", previousState === "hidden");
+  sidebar.classList.toggle("is-mobile-expanded", previousState === "expanded");
+  sidebar.style.height = previousHeight;
+  sidebar.style.transition = previousTransition;
+
+  return height;
+}
+
+function getMobileSheetHeights() {
+  return {
+    hidden: measureMobileSheetHeight("hidden"),
+    collapsed: measureMobileSheetHeight("collapsed"),
+    expanded: measureMobileSheetHeight("expanded"),
+  };
+}
+
+function clampMobileSheetHeight(height, heights) {
+  const maxHeight = startMarker ? heights.expanded : heights.collapsed;
+  return Math.min(Math.max(height, heights.hidden), maxHeight);
+}
+
+mobileSheetToggle?.addEventListener("click", () => {
+  if (mobileSheetDrag.suppressClick) {
+    mobileSheetDrag.suppressClick = false;
+    return;
+  }
+
+  if (getMobileSheetState() === "hidden") {
+    setMobileSheetState("collapsed");
+    return;
+  }
+
+  if (!startMarker) {
+    setMobileSheetState("collapsed");
+    return;
+  }
+
+  setMobileSheetState(
+    getMobileSheetState() === "expanded" ? "collapsed" : "expanded",
+  );
+});
+
+mobileSheetToggle?.addEventListener("pointerdown", (event) => {
+  if (!mobileSheetQuery.matches || !event.isPrimary) return;
+
+  window.clearTimeout(mobileSheetDrag.snapTimer);
+  sidebar.classList.remove("is-mobile-snapping");
+
+  mobileSheetDrag.pointerId = event.pointerId;
+  mobileSheetDrag.startY = event.clientY;
+  mobileSheetDrag.startHeight = sidebar.getBoundingClientRect().height;
+  mobileSheetDrag.currentHeight = mobileSheetDrag.startHeight;
+  mobileSheetDrag.moved = false;
+  mobileSheetDrag.suppressClick = false;
+  mobileSheetDrag.heights = getMobileSheetHeights();
+
+  sidebar.style.height = `${mobileSheetDrag.startHeight}px`;
+  updateMobileSheetAttachedControls(mobileSheetDrag.startHeight);
+  sidebar.classList.add("is-mobile-dragging");
+  mobileSheetToggle.setPointerCapture(event.pointerId);
+  event.preventDefault();
+});
+
+mobileSheetToggle?.addEventListener("pointermove", (event) => {
+  if (mobileSheetDrag.pointerId !== event.pointerId) return;
+
+  const deltaY = event.clientY - mobileSheetDrag.startY;
+  if (Math.abs(deltaY) > 4) {
+    mobileSheetDrag.moved = true;
+  }
+
+  const heights = mobileSheetDrag.heights || getMobileSheetHeights();
+  const nextHeight = clampMobileSheetHeight(
+    mobileSheetDrag.startHeight - deltaY,
+    heights,
+  );
+
+  sidebar.classList.remove("is-mobile-hidden");
+  sidebar.classList.toggle(
+    "is-mobile-expanded",
+    startMarker && nextHeight > heights.collapsed + 24,
+  );
+  sidebar.style.height = `${nextHeight}px`;
+  updateMobileSheetAttachedControls(nextHeight);
+  mobileSheetDrag.currentHeight = nextHeight;
+  event.preventDefault();
+});
+
+mobileSheetToggle?.addEventListener("pointerup", (event) => {
+  if (mobileSheetDrag.pointerId !== event.pointerId) return;
+
+  const heights = mobileSheetDrag.heights || getMobileSheetHeights();
+  const height = mobileSheetDrag.currentHeight || mobileSheetDrag.startHeight;
+  const hiddenLimit = (heights.hidden + heights.collapsed) / 2;
+  const expandedLimit = heights.collapsed + (heights.expanded - heights.collapsed) * 0.45;
+  let targetState = "collapsed";
+
+  if (height <= hiddenLimit) {
+    targetState = "hidden";
+  } else if (startMarker && height >= expandedLimit) {
+    targetState = "expanded";
+  }
+
+  if (mobileSheetToggle.hasPointerCapture(event.pointerId)) {
+    mobileSheetToggle.releasePointerCapture(event.pointerId);
+  }
+  setMobileSheetState(targetState, { fromHeight: height });
+
+  mobileSheetDrag.suppressClick = mobileSheetDrag.moved;
+  mobileSheetDrag.pointerId = null;
+  mobileSheetDrag.heights = null;
+});
+
+mobileSheetToggle?.addEventListener("pointercancel", (event) => {
+  if (mobileSheetDrag.pointerId !== event.pointerId) return;
+
+  const height = mobileSheetDrag.currentHeight || mobileSheetDrag.startHeight;
+
+  if (mobileSheetToggle.hasPointerCapture(event.pointerId)) {
+    mobileSheetToggle.releasePointerCapture(event.pointerId);
+  }
+  setMobileSheetState(getMobileSheetState(), { fromHeight: height });
+  mobileSheetDrag.pointerId = null;
+  mobileSheetDrag.heights = null;
 });
 // На телефонах Leaflet слушает жесты на всей карте. Если свайп начинается
 // на нижней панели, останавливаем всплытие события, чтобы вместо карты
@@ -175,6 +394,7 @@ function clearStartPoint() {
   updateManualSignsPanelVisibility();
   updateAddressClearVisibility();
   document.body.classList.remove("has-start-point");
+  setMobileSheetState("collapsed");
   setProgress("idle");
   setStatus("Введите адрес или нажмите на любое место карты.");
 }
