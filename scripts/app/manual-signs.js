@@ -1,4 +1,4 @@
-﻿/* Ручные дорожные знаки: добавление, удаление, очистка и сохранение в ссылке. */
+/* Ручные дорожные знаки: добавление, удаление, очистка и сохранение в ссылке. */
 // Типы знаков, которые пользователь может поставить вручную на карту.
 const manualSignTypes = {
   crossing: {
@@ -48,7 +48,8 @@ function renderManualSigns() {
       icon: createSafetyIcon(typeInfo.symbol, sign.type),
       zIndexOffset:
         sign.type === "light" || sign.type === "danger" ? 1200 : 900,
-    }).addTo(map);
+    });
+    syncSafetyMarkerVisibility(marker, sign.type);
 
     marker.bindPopup(makeManualSignPopup(sign));
     marker.on("popupopen", () => {

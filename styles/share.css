@@ -1,38 +1,35 @@
-﻿.share-route-button {
+/* Кнопка открытия окна «Поделиться». */
+.share-route-button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-height: 42px;
   margin: 10px 0;
+  color: #1769dd;
+  cursor: pointer;
+  background: #f4f8ff;
   border: 1px solid #b7cff5;
   border-radius: 11px;
-  background: #f4f8ff;
-  color: #1769dd;
   font: inherit;
   font-weight: 700;
-  cursor: pointer;
   transition: 0.2s ease;
 }
+
 .share-route-icon {
   display: inline-grid;
   width: 20px;
   height: 20px;
-  margin-right: 7px;
-  vertical-align: -5px;
   place-items: center;
 }
 
-.share-route-icon svg {
+.share-route-icon img {
+  display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
-  fill: currentcolor;
-  stroke: currentcolor;
-  stroke-width: 7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.share-route-button[hidden] {
-  display: none;
+  object-fit: contain;
+  filter: invert(35%) sepia(83%) saturate(1715%) hue-rotate(202deg) brightness(88%);
 }
 
 .share-route-button:hover {
@@ -40,279 +37,324 @@
   border-color: #1769dd;
   transform: translateY(-1px);
 }
+
+.share-route-button[hidden] {
+  display: none;
+}
+
+/* Модальное окно и его десктопная раскладка. */
 .route-share-modal {
   position: fixed;
   z-index: 3000;
   inset: 0;
   display: grid;
-  place-items: center;
   padding: 20px;
-  background: rgba(15, 27, 45, 0.48);
+  overflow-y: auto;
+  background: rgb(15 27 45 / 52%);
+  place-items: center;
 }
+
+.route-share-modal[hidden] {
+  display: none;
+}
+
 .route-share-dialog {
   position: relative;
-  width: min(100%, 410px);
   box-sizing: border-box;
-  padding: 28px;
-  border-radius: 20px;
+  width: min(100%, 590px);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  padding: 26px;
+  overflow-y: auto;
   background: #fff;
-  box-shadow: 0 22px 70px rgba(18, 35, 58, 0.28);
-  text-align: center;
+  border-radius: 20px;
+  box-shadow: 0 22px 70px rgb(18 35 58 / 30%);
 }
+
 .route-share-dialog h2 {
-  margin: 0 36px 8px;
+  margin: 0 42px 6px 0;
   color: #15243a;
   font-size: 22px;
+  line-height: 1.2;
 }
-.route-share-dialog p {
-  margin: 0 0 20px;
+
+.route-share-intro {
+  margin: 0 42px 20px 0;
   color: #607087;
-  line-height: 1.45;
+  line-height: 1.4;
 }
+
 .route-share-close {
   position: absolute;
   top: 12px;
   right: 12px;
+  display: grid;
   width: 34px;
   height: 34px;
+  padding: 0;
+  color: #526176;
+  cursor: pointer;
+  background: #f0f3f7;
   border: 0;
   border-radius: 50%;
-  background: #f0f3f7;
-  color: #526176;
   font-size: 24px;
-  cursor: pointer;
+  line-height: 1;
+  place-items: center;
 }
+
+.route-share-content {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+}
+
 .route-qr-code {
   display: grid;
+  box-sizing: border-box;
   width: 216px;
   min-height: 216px;
-  margin: 0 auto 18px;
-  place-items: center;
-  border: 1px solid #e2e7ee;
-  border-radius: 14px;
   background: #fff;
+  border: 1px solid #e2e7ee;
+  border-radius: 15px;
+  place-items: center;
 }
+
 .route-qr-code img,
 .route-qr-code canvas {
   display: block;
+  max-width: 196px;
+  max-height: 196px;
 }
+
 .route-qr-code--error {
   padding: 14px;
-  box-sizing: border-box;
   color: #b44444;
   font-size: 14px;
+  text-align: center;
 }
+
+.route-share-options {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+}
+
+.route-share-native,
+.route-share-download,
+.route-share-copy {
+  min-height: 42px;
+  padding: 9px 12px;
+  cursor: pointer;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 750;
+}
+
+.route-share-native {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #1769dd;
+  border: 0;
+}
+
+.route-share-native[hidden] {
+  display: none;
+}
+
+.route-share-native-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+}
+
+.route-share-native-icon img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.route-share-subtitle {
+  color: #526176;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.route-share-targets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.route-share-target {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 68px;
+  padding: 7px 4px;
+  color: #34445a;
+  text-decoration: none;
+  background: #f7f9fc;
+  border: 1px solid #e0e7f0;
+  border-radius: 11px;
+  flex-direction: column;
+  font-size: 10px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.route-share-target:hover {
+  background: #eef4fc;
+  border-color: #b8c9e2;
+}
+
+.route-share-target > img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 9px;
+}
+
+.route-share-target.is-email > img {
+  box-sizing: border-box;
+  padding: 5px;
+  background: #eef3f8;
+  border-radius: 9px;
+}
+
+.route-share-download {
+  color: #1769dd;
+  background: #fff;
+  border: 1px solid #b7cff5;
+}
+
+.route-share-download:hover {
+  background: #f4f8ff;
+}
+
+.route-share-link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 18px;
+}
+
 .route-share-link {
   display: block;
+  min-width: 0;
   overflow: hidden;
   padding: 11px 12px;
-  border-radius: 10px;
-  background: #f5f7fa;
   color: #1769dd;
-  font-size: 13px;
+  background: #f5f7fa;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 20px;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .route-share-copy {
-  width: 100%;
-  min-height: 42px;
-  margin-top: 10px;
-  border: 0;
-  border-radius: 10px;
-  background: #1769dd;
   color: #fff;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
+  background: #1769dd;
+  border: 0;
 }
+
+.route-share-status {
+  min-height: 18px;
+  margin: 7px 0 0;
+  color: #3d6d4d;
+  font-size: 12px;
+  text-align: center;
+}
+
+.route-share-status.is-error {
+  color: #b3261e;
+}
+
 .modal-open {
   overflow: hidden;
 }
 
-/* Атрибут hidden должен иметь приоритет над сеточной раскладкой окна. */
-.route-share-modal[hidden] {
-  display: none;
-}
-/* Простая адаптация модального окна под разные размеры экранов. */
-@media (max-width: 1024px) {
-  .route-share-dialog {
-    width: 380px;
-    padding: 24px;
-  }
-
-  .route-qr-code {
-    width: 200px;
-    min-height: 200px;
-  }
-
-  .route-qr-code img,
-  .route-qr-code canvas {
-    width: 180px !important;
-    height: 180px !important;
-  }
-}
-
+/* На телефоне QR и способы отправки располагаются друг под другом. */
 @media (max-width: 760px) {
-  .route-share-modal {
-    align-items: center;
-    justify-items: center;
-    padding: 14px;
-    overflow-y: auto;
-  }
-
-  .route-share-dialog {
-    width: 340px;
-    max-width: 100%;
-    max-height: 92vh;
-    padding: 20px 16px;
-    overflow-y: auto;
-    border-radius: 18px;
-  }
-
-  .route-share-dialog h2 {
-    margin: 0 36px 8px;
-    font-size: 20px;
-    line-height: 1.2;
-  }
-
-  .route-share-dialog p {
-    margin-bottom: 12px;
-    font-size: 14px;
-  }
-
-  .route-qr-code {
-    width: 188px;
-    min-height: 188px;
-    margin-bottom: 12px;
-  }
-
-  .route-qr-code img,
-  .route-qr-code canvas {
-    width: 168px !important;
-    height: 168px !important;
-  }
-
-  .route-share-link {
-    font-size: 12px;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-}
-
-@media (max-width: 480px) {
   .route-share-modal {
     padding: 10px;
   }
 
   .route-share-dialog {
-    width: 310px;
-    max-height: 90vh;
-    padding: 18px 14px;
-    border-radius: 16px;
+    width: min(100%, 420px);
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: 20px 16px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 18px;
   }
 
   .route-share-dialog h2 {
-    margin: 0 34px 6px;
-    font-size: 18px;
+    margin-right: 40px;
+    font-size: 20px;
   }
 
-  .route-share-dialog p {
-    margin-bottom: 10px;
+  .route-share-intro {
+    margin: 0 38px 13px 0;
     font-size: 13px;
   }
 
-  .route-share-close {
-    top: 9px;
-    right: 9px;
-    width: 32px;
-    height: 32px;
+  .route-share-content {
+    grid-template-columns: 1fr;
+    gap: 13px;
   }
 
   .route-qr-code {
-    width: 168px;
-    min-height: 168px;
-    margin-bottom: 10px;
+    width: 176px;
+    min-height: 176px;
+    margin: 0 auto;
   }
 
   .route-qr-code img,
   .route-qr-code canvas {
-    width: 148px !important;
-    height: 148px !important;
+    width: 156px !important;
+    height: 156px !important;
   }
 
-  .route-share-copy {
-    min-height: 40px;
-  }
-}
-
-@media (max-width: 360px) {
-  .route-share-modal {
-    padding: 8px;
+  .route-share-targets {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .route-share-dialog {
-    width: 288px;
-    max-height: 88vh;
-    padding: 16px 12px;
+  .route-share-target {
+    min-height: 64px;
   }
 
-  .route-share-dialog h2 {
-    font-size: 17px;
+  .route-share-link-row {
+    margin-top: 13px;
   }
 
-  .route-qr-code {
-    width: 150px;
-    min-height: 150px;
+  .route-share-link {
+    font-size: 11px;
   }
 
-  .route-qr-code img,
-  .route-qr-code canvas {
-    width: 132px !important;
-    height: 132px !important;
-  }
-}
-
-@media (max-height: 620px) {
-  .route-share-modal {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    overflow-y: auto;
-  }
-
-  .route-share-dialog {
-    max-height: calc(100vh - 16px);
-    padding-top: 14px;
-    padding-bottom: 14px;
-    overflow-y: auto;
-  }
-
-  .route-share-dialog p {
-    margin-bottom: 8px;
-  }
-
-  .route-qr-code {
-    width: 142px;
-    min-height: 142px;
-    margin-bottom: 8px;
-  }
-
-  .route-qr-code img,
-  .route-qr-code canvas {
-    width: 124px !important;
-    height: 124px !important;
-  }
-}
-@media (max-width: 760px) {
+  /* Та же кнопка становится плавающей справа над нижней панелью. */
   .share-route-button {
     position: fixed;
     z-index: 1100;
     right: 14px;
     bottom: calc(
       var(
-        --mobile-sheet-current-height,
-        calc(var(--mobile-collapsed-sheet, 126px) + var(--mobile-safe-bottom, env(safe-area-inset-bottom)))
-      ) + var(--mobile-sheet-share-gap, 14px)
+          --mobile-sheet-current-height,
+          calc(
+            var(--mobile-collapsed-sheet, 126px) +
+              var(--mobile-safe-bottom, env(safe-area-inset-bottom))
+          )
+        ) + var(--mobile-sheet-share-gap, 14px)
     );
     display: grid;
     width: 50px;
@@ -330,27 +372,22 @@
     place-items: center;
     font-size: 0;
     transition:
-      background-color 0.2s ease,
-      box-shadow 0.2s ease,
       bottom 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.2s ease;
+      background-color 0.2s ease;
   }
+
   .share-route-button .share-route-icon {
-    display: grid;
     width: 26px;
     height: 26px;
     margin: 0;
-    color: #fff;
-    filter: none;
-    place-items: center;
-    vertical-align: 0;
   }
 
-  .share-route-button .share-route-icon svg {
+  .share-route-button .share-route-icon img {
     display: block;
     width: 24px;
     height: 24px;
-    overflow: visible;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
   }
 
   .share-route-button .share-route-text {
@@ -371,3 +408,50 @@
   }
 }
 
+@media (max-width: 390px) {
+  .route-share-dialog {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .route-share-targets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .route-share-target {
+    min-height: 58px;
+    flex-direction: row;
+    font-size: 11px;
+  }
+
+  .route-share-target > img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .route-share-link-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 650px) {
+  .route-share-dialog {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .route-share-intro {
+    margin-bottom: 8px;
+  }
+
+  .route-qr-code {
+    width: 148px;
+    min-height: 148px;
+  }
+
+  .route-qr-code img,
+  .route-qr-code canvas {
+    width: 132px !important;
+    height: 132px !important;
+  }
+}

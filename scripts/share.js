@@ -1,12 +1,16 @@
-﻿/* Окно «Поделиться маршрутом»: QR-код и копирование ссылки. */
+/* Поделиться маршрутом: системное меню устройства, QR-код и десктопные сервисы. */
 (function () {
   const modal = document.getElementById("shareRouteModal");
   const qr = document.getElementById("routeQrCode");
   const link = document.getElementById("shareRouteLink");
-  const copy = document.getElementById("copyRouteLink");
+  const copyButton = document.getElementById("copyRouteLink");
+  const nativeShareButton = document.getElementById("nativeShareRoute");
+  const downloadQrButton = document.getElementById("downloadRouteQr");
+  const statusElement = document.getElementById("shareRouteStatus");
   const closeButtons = document.querySelectorAll("[data-close-share-modal]");
+  const shareTargets = document.querySelectorAll("[data-share-service]");
 
-  if (!modal || !qr || !link || !copy) return;
+  if (!modal || !qr || !link || !copyButton) return;
 
   const button = document.createElement("button");
   button.type = "button";
@@ -14,25 +18,18 @@
   button.hidden = true;
   button.innerHTML = `
     <span class="share-route-icon" aria-hidden="true">
-      <svg viewBox="0 0 64 64" focusable="false">
-        <path d="M25 28 41 18M25 36l16 10" />
-        <circle cx="20" cy="32" r="7" />
-        <circle cx="46" cy="15" r="7" />
-        <circle cx="46" cy="49" r="7" />
-      </svg>
+      <img src="images/share/share.png" alt="" />
     </span>
     <span class="share-route-text">Поделиться маршрутом</span>
   `;
 
-  // На десктопе кнопка визуально остается в левой панели, а на мобильной
-  // CSS превращает этот же элемент в плавающую кнопку справа на карте.
   const shareHost = document.getElementById("share-button-host");
   const routesSection = document.getElementById("route-options-section");
-  if (shareHost) {
-    shareHost.appendChild(button);
-  }
+  const mobileShareQuery = window.matchMedia("(max-width: 760px)");
+  let qrFile = null;
 
-  // Появляется только после успешного построения хотя бы одного варианта пути.
+  shareHost?.appendChild(button);
+
   function updateShareButtonVisibility() {
     button.hidden = !routesSection || routesSection.hidden;
   }
@@ -45,43 +42,203 @@
     });
   }
 
+  function setShareStatus(message, isError = false) {
+    if (!statusElement) return;
+    statusElement.textContent = message;
+    statusElement.classList.toggle("is-error", isError);
+  }
 
+  function getCurrentShareUrl() {
+    return typeof window.getShareRouteUrl === "function"
+      ? window.getShareRouteUrl()
+      : window.location.href;
+  }
 
-  function openModal() {
-    const url =
-      typeof window.getShareRouteUrl === "function"
-        ? window.getShareRouteUrl()
-        : window.location.href;
+  function updateServiceLinks(url) {
+    const title = "Безопасный маршрут в школу";
+    const message = "Посмотрите построенный безопасный маршрут в школу:";
+    const encodedUrl = encodeURIComponent(url);
+    const encodedMessage = encodeURIComponent(message);
+    const encodedFullMessage = encodeURIComponent(`${message}\n${url}`);
+
+    shareTargets.forEach((target) => {
+      const service = target.dataset.shareService;
+
+      if (service === "telegram") {
+        target.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedMessage}`;
+      } else if (service === "max") {
+        target.href = `https://max.ru/:share?text=${encodedFullMessage}`;
+      } else if (service === "vk") {
+        target.href = `https://vk.com/share.php?url=${encodedUrl}&title=${encodeURIComponent(title)}`;
+      } else if (service === "email") {
+        target.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodedFullMessage}`;
+      }
+    });
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    const [metadata, encodedData] = dataUrl.split(",");
+    if (!metadata || !encodedData) return null;
+
+    const mimeType = metadata.match(/data:([^;]+)/)?.[1] ?? "image/png";
+    const binary = atob(encodedData);
+    const bytes = new Uint8Array(binary.length);
+
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+
+    return new Blob([bytes], { type: mimeType });
+  }
+
+  function createQrFile() {
+    const canvas = qr.querySelector("canvas");
+    const image = qr.querySelector("img");
+    const dataUrl = canvas?.toDataURL("image/png") || image?.src;
+
+    if (!dataUrl?.startsWith("data:") || typeof File !== "function") {
+      return null;
+    }
+
+    const blob = dataUrlToBlob(dataUrl);
+    if (!blob) return null;
+
+    return new File([blob], "bezopasnyi-marshrut-qr.png", {
+      type: "image/png",
+    });
+  }
+
+  function renderQrCode(url) {
+    qr.replaceChildren();
+    qr.classList.remove("route-qr-code--error");
+    qrFile = null;
+
+    if (!window.QRCode) {
+      qr.textContent = "QR-код не загрузился. Используйте ссылку ниже.";
+      qr.classList.add("route-qr-code--error");
+      return;
+    }
+
+    new window.QRCode(qr, {
+      text: url,
+      width: 196,
+      height: 196,
+      colorDark: "#15243a",
+      colorLight: "#ffffff",
+      correctLevel: window.QRCode.CorrectLevel.M,
+    });
+    qrFile = createQrFile();
+  }
+
+  function prepareShareData() {
+    const url = getCurrentShareUrl();
 
     link.href = url;
     link.textContent = url;
     link.title = url;
-    qr.replaceChildren();
+    copyButton.textContent = "Копировать";
+    setShareStatus("");
+    updateServiceLinks(url);
+    renderQrCode(url);
 
-    if (window.QRCode) {
-      new window.QRCode(qr, {
-        text: url,
-        width: 196,
-        height: 196,
-        colorDark: "#15243a",
-        colorLight: "#ffffff",
-        correctLevel: window.QRCode.CorrectLevel.M,
-      });
-    } else {
-      qr.textContent = "QR-код не загрузился. Используйте ссылку ниже.";
-      qr.classList.add("route-qr-code--error");
+    return url;
+  }
+
+  function openModal() {
+    prepareShareData();
+
+    if (nativeShareButton) {
+      nativeShareButton.hidden = typeof navigator.share !== "function";
     }
 
     modal.hidden = false;
     document.body.classList.add("modal-open");
+    modal.querySelector(".route-share-close")?.focus({ preventScroll: true });
   }
 
   function closeModal() {
     modal.hidden = true;
     document.body.classList.remove("modal-open");
+    button.focus({ preventScroll: true });
   }
 
-  button.addEventListener("click", openModal);
+  async function copyRouteLink() {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link.href);
+      } else {
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = link.href;
+        temporaryInput.style.position = "fixed";
+        temporaryInput.style.opacity = "0";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+        document.execCommand("copy");
+        temporaryInput.remove();
+      }
+
+      copyButton.textContent = "Скопировано";
+      setShareStatus("Ссылка скопирована в буфер обмена.");
+      setTimeout(() => {
+        copyButton.textContent = "Копировать";
+      }, 1800);
+    } catch {
+      setShareStatus("Не удалось скопировать ссылку.", true);
+    }
+  }
+
+  async function shareThroughDevice() {
+    if (typeof navigator.share !== "function") return false;
+
+    const shareData = {
+      title: "Безопасный маршрут в школу",
+      text: "Посмотрите построенный безопасный маршрут в школу.",
+      url: link.href,
+    };
+
+    if (qrFile && navigator.canShare?.({ files: [qrFile] })) {
+      shareData.files = [qrFile];
+    }
+
+    try {
+      await navigator.share(shareData);
+      setShareStatus("Маршрут передан в системное меню отправки.");
+      return true;
+    } catch (error) {
+      if (error?.name === "AbortError") return true;
+
+      setShareStatus("Системная отправка недоступна.", true);
+      return false;
+    }
+  }
+
+  async function handleShareButtonClick() {
+    if (mobileShareQuery.matches && typeof navigator.share === "function") {
+      prepareShareData();
+      const shared = await shareThroughDevice();
+
+      if (shared) return;
+    }
+
+    openModal();
+  }
+
+  function downloadQrCode() {
+    if (!qrFile) {
+      setShareStatus("Не удалось подготовить PNG с QR-кодом.", true);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(qrFile);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = objectUrl;
+    downloadLink.download = qrFile.name;
+    downloadLink.click();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    setShareStatus("QR-код сохранён как PNG.");
+  }
+
+  button.addEventListener("click", handleShareButtonClick);
   closeButtons.forEach((item) => item.addEventListener("click", closeModal));
   modal.addEventListener("click", (event) => {
     if (event.target === modal) closeModal();
@@ -90,23 +247,10 @@
     if (event.key === "Escape" && !modal.hidden) closeModal();
   });
 
-  copy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(link.href);
-      copy.textContent = "Ссылка скопирована";
-      setTimeout(() => {
-        copy.textContent = "Скопировать ссылку";
-      }, 1800);
-    } catch {
-      link.focus();
-    }
+  copyButton.addEventListener("click", copyRouteLink);
+  nativeShareButton?.addEventListener("click", async () => {
+    prepareShareData();
+    await shareThroughDevice();
   });
+  downloadQrButton?.addEventListener("click", downloadQrCode);
 })();
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-﻿/* Реальные объекты OSM рядом с маршрутом: Overpass, фильтрация и отображение знаков. */
+/* Реальные объекты OSM рядом с маршрутом: Overpass, фильтрация и отображение знаков. */
 // Удаляет реальные знаки предыдущего маршрута и отменяет незавершённый запрос к Overpass.
 function clearSafetyMarkers() {
   if (activeSafetyRequest) {
@@ -9,26 +9,70 @@ function clearSafetyMarkers() {
   safetyMarkers.forEach((marker) => map.removeLayer(marker));
   safetyMarkers = [];
 }
+// Мелкие дорожные детали не показываем на общем плане: они появляются при приближении карты.
+const detailedSafetyMarkerMinZoom = 13;
+const speedMarkerMinZoom = 13;
 
-// Создаёт круглый значок перехода, светофора или участка внимания.
+function isDetailedSafetyMarker(type) {
+  return type === "crossing" || type === "light";
+}
+
+function shouldShowSafetyMarker(type) {
+  if (type === "speed") {
+    return map.getZoom() >= speedMarkerMinZoom;
+  }
+
+  return (
+    !isDetailedSafetyMarker(type) ||
+    map.getZoom() >= detailedSafetyMarkerMinZoom
+  );
+}
+
+function syncSafetyMarkerVisibility(marker, type) {
+  const shouldBeVisible = shouldShowSafetyMarker(type);
+  const isVisible = map.hasLayer(marker);
+
+  if (shouldBeVisible && !isVisible) {
+    marker.addTo(map);
+  } else if (!shouldBeVisible && isVisible) {
+    map.removeLayer(marker);
+  }
+}
+
+function updateSafetyMarkersVisibility() {
+  safetyMarkers.forEach((marker) => {
+    syncSafetyMarkerVisibility(marker, marker.safetyType);
+  });
+
+  manualSigns.forEach((sign) => {
+    if (sign.marker) {
+      syncSafetyMarkerVisibility(sign.marker, sign.type);
+    }
+  });
+}
+
+// Создаёт значок объекта безопасности для маркера Leaflet.
 function createSafetyIcon(symbol, type) {
-  // SVG подключаем через нативный L.icon: Leaflet корректно масштабирует файл по iconSize.
-  if (type === "crossing") {
+  // PNG подключаем через L.icon, чтобы одинаковые изображения использовались на карте и в меню.
+  if (type === "crossing" || type === "light") {
+    const isTrafficLight = type === "light";
+    const iconSize = isTrafficLight ? 20 : 26;
+
     return L.icon({
-      iconUrl: "images/RU_road_sign_5.19.2.svg",
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
-      popupAnchor: [0, -12],
+      iconUrl: isTrafficLight ? "images/light.png" : "images/cross.png",
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize / 2, iconSize / 2],
+      popupAnchor: [0, -iconSize / 2],
     });
   }
 
-  const isTrafficLight = type === "light";
+  const iconSize = type === "speed" ? 30 : 34;
 
   return L.divIcon({
     className: "",
     html: `<span class="safety-sign safety-sign--${type}">${symbol}</span>`,
-    iconSize: isTrafficLight ? [40, 40] : [34, 34],
-    iconAnchor: isTrafficLight ? [20, 20] : [17, 17],
+    iconSize: [iconSize, iconSize],
+    iconAnchor: [iconSize / 2, iconSize / 2],
   });
 }
 
@@ -78,7 +122,7 @@ function makeSensibleViaPoints(route) {
 
 // Подбирает дополнительные варианты и отбрасывает почти одинаковые или слишком длинные пути.
 async function expandReasonableRoutes(startPoint, initialRoutes, controller) {
-  const collectedRoutes = [...initialRoutes];
+  const collectedRoutes = filterRoutesAvoidingFixedDangerRoads(initialRoutes);
   const baseRoute = initialRoutes.reduce((bestRoute, route) =>
     route.distance < bestRoute.distance ? route : bestRoute,
   );
@@ -106,6 +150,7 @@ async function expandReasonableRoutes(startPoint, initialRoutes, controller) {
 
           if (
             candidate.geometry?.coordinates?.length &&
+            routeAvoidsFixedDangerRoads(candidate) &&
             !hasSameSignature &&
             isMeaningfullyDifferent(candidate, collectedRoutes)
           ) {
@@ -114,8 +159,8 @@ async function expandReasonableRoutes(startPoint, initialRoutes, controller) {
         });
 
         const reasonableRoutes = filterReasonableRoutes(
-          collectedRoutes.filter(
-            (route) => route.geometry?.coordinates?.length,
+          filterRoutesAvoidingFixedDangerRoads(
+            collectedRoutes.filter((route) => route.geometry?.coordinates?.length),
           ),
         ).slice(0, maximumReasonableRoutes);
 
@@ -324,7 +369,9 @@ async function drawSafetyMarkers(variant) {
         icon: createSafetyIcon(item.symbol, item.type),
         // Светофор важнее визуально и должен перекрывать переход при совпадении точек.
         zIndexOffset: item.type === "light" ? 1000 : 0,
-      }).addTo(map);
+      });
+      marker.safetyType = item.type;
+      syncSafetyMarkerVisibility(marker, item.type);
 
       // В прототипе оставляем место под будущую фотографию реального участка.
       marker.bindPopup(`
@@ -351,3 +398,6 @@ async function drawSafetyMarkers(variant) {
     }
   }
 }
+
+// При изменении масштаба показываем или скрываем детальные дорожные знаки.
+map.on("zoomend", updateSafetyMarkersVisibility);

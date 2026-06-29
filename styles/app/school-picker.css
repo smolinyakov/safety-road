@@ -1,4 +1,4 @@
-﻿/* Hero-блок и выбор школы. */
+/* Hero-блок и выбор школы. */
 .project-hero {
   position: relative;
   z-index: 10;
@@ -10,16 +10,6 @@
   border-radius: 18px;
 }
 
-.project-hero::after {
-  position: absolute;
-  top: -28px;
-  right: -20px;
-  width: 150px;
-  height: 150px;
-  background: rgb(26 115 232 / 10%);
-  border-radius: 50%;
-  content: "";
-}
 
 .project-hero > * {
   position: relative;
@@ -187,6 +177,7 @@
 
 .school-icon {
   display: grid;
+  box-sizing: border-box;
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
@@ -195,12 +186,18 @@
   border: 3px solid #dbeaff;
   border-radius: 50%;
   box-shadow: 0 4px 9px rgb(26 115 232 / 22%);
+  overflow: hidden;
+  padding: 2px;
   place-items: center;
   font-size: 16px;
 }
 
-.school-icon svg {
+.school-icon img {
   display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: contain;
 }
 
 .school-card strong,

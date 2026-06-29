@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
@@ -40,47 +40,7 @@
               aria-controls="school-picker-panel"
             >
               <div class="school-icon" aria-hidden="true">
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 26 26"
-                  focusable="false"
-                >
-                  <path
-                    d="M4 21.5h18"
-                    stroke="#dbeaff"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <path d="M6 11.2 13 6l7 5.2v10.3H6V11.2Z" fill="#fff" />
-                  <path
-                    d="M4.8 11.5 13 5.3l8.2 6.2"
-                    fill="none"
-                    stroke="#dbeaff"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M10.2 21.5v-5.4h5.6v5.4"
-                    fill="#1769d2"
-                    opacity="0.95"
-                  />
-                  <path
-                    d="M8.1 12.6h3.1v2.7H8.1v-2.7Zm6.7 0h3.1v2.7h-3.1v-2.7Z"
-                    fill="#8ab4f8"
-                  />
-                  <path
-                    d="M13 5.3V2.8"
-                    stroke="#fff"
-                    stroke-width="1.7"
-                    stroke-linecap="round"
-                  />
-                  <path
-                    d="M13.8 3.1h4.2l-1 1.4 1 1.4h-4.2V3.1Z"
-                    fill="#fdd663"
-                  />
-                </svg>
+                <img src="images/school.png" alt="" />
               </div>
               <div class="school-card-text">
                 <strong id="selected-school-name">МБОУ СОШ №85</strong>
@@ -175,7 +135,7 @@
             <div class="route-progress" id="route-progress" hidden>
               <span data-progress="point">1. Точка</span>
               <span data-progress="route">2. Маршрут</span>
-              <span data-progress="score">3. Оценка</span>
+              <span data-progress="variants">3. Варианты</span>
             </div>
             <ul class="route-reasons" id="route-reasons" hidden></ul>
           </div>
@@ -198,11 +158,11 @@
                 type="button"
                 data-sign-type="crossing"
               >
-                <img src="images/RU_road_sign_5.19.2.svg" alt="" />
+                <img src="images/cross.png" alt="" />
                 <span>Пешеходный переход</span>
               </button>
               <button class="sign-option" type="button" data-sign-type="light">
-                <span class="sign-option-icon" aria-hidden="true">🚦</span>
+                <img src="images/light.png" alt="" />
                 <span>Светофор</span>
               </button>
               <button class="sign-option" type="button" data-sign-type="speed">
@@ -258,11 +218,10 @@
         </div>
 
         <details class="risk-help">
-          <summary>Как рассчитывается оценка?</summary>
+          <summary>Как выбираются варианты?</summary>
           <p>
-            Это учебная оценка: сравниваются длина пути, число поворотов и
-            пересечений. Она не заменяет сведения о ДТП или проверку маршрута
-            взрослыми.
+            Пути через отмеченные красным опасные участки исключаются. Остальные
+            варианты сравниваются по длине и числу поворотов.
           </p>
         </details>
       </aside>
@@ -278,6 +237,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="scripts/schools-data.js"></script>
     <script src="scripts/app/state-and-map.js"></script>
+    <script src="scripts/app/danger-roads.js"></script>
     <script src="scripts/app/schools.js"></script>
     <script src="scripts/app/route-utils.js"></script>
     <script src="scripts/app/manual-signs.js"></script>
@@ -301,22 +261,95 @@
           ×
         </button>
         <h2 id="shareRouteTitle">Поделиться маршрутом</h2>
-        <p>Отсканируйте QR-код или откройте ссылку на другом устройстве.</p>
-        <div
-          class="route-qr-code"
-          id="routeQrCode"
-          aria-label="QR-код маршрута"
-        ></div>
-        <a
-          class="route-share-link"
-          id="shareRouteLink"
-          href="#"
-          target="_blank"
-          rel="noopener"
-        ></a>
-        <button class="route-share-copy" id="copyRouteLink" type="button">
-          Скопировать ссылку
-        </button>
+        <p class="route-share-intro">
+          Отправьте маршрут через приложение или покажите QR-код.
+        </p>
+
+        <div class="route-share-content">
+          <div
+            class="route-qr-code"
+            id="routeQrCode"
+            aria-label="QR-код маршрута"
+          ></div>
+
+          <div class="route-share-options">
+            <button
+              class="route-share-native"
+              id="nativeShareRoute"
+              type="button"
+              hidden
+            >
+              <span class="route-share-native-icon" aria-hidden="true">
+                <img src="images/share/share.png" alt="" />
+              </span>
+              <span>Поделиться QR и ссылкой</span>
+            </button>
+
+            <span class="route-share-subtitle">Отправить ссылку</span>
+            <div class="route-share-targets" aria-label="Способы отправки">
+              <a
+                class="route-share-target is-telegram"
+                data-share-service="telegram"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="images/share/telegram.png" alt="" />
+                Telegram
+              </a>
+              <a
+                class="route-share-target is-max"
+                data-share-service="max"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="images/share/max.png" alt="" />
+                MAX
+              </a>
+              <a
+                class="route-share-target is-vk"
+                data-share-service="vk"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="images/share/vk.png" alt="" />
+                ВКонтакте
+              </a>
+              <a
+                class="route-share-target is-email"
+                data-share-service="email"
+              >
+                <img src="images/share/email.png" alt="" />
+                Почта
+              </a>
+            </div>
+
+            <button
+              class="route-share-download"
+              id="downloadRouteQr"
+              type="button"
+            >
+              Сохранить QR-код
+            </button>
+          </div>
+        </div>
+
+        <div class="route-share-link-row">
+          <a
+            class="route-share-link"
+            id="shareRouteLink"
+            href="#"
+            target="_blank"
+            rel="noopener"
+          ></a>
+          <button class="route-share-copy" id="copyRouteLink" type="button">
+            Копировать
+          </button>
+        </div>
+        <p
+          class="route-share-status"
+          id="shareRouteStatus"
+          aria-live="polite"
+        ></p>
       </section>
     </div>
 

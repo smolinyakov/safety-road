@@ -1,4 +1,4 @@
-﻿/* Общие функции маршрутов: статусы, форматирование, запросы маршрутизатора и оценка вариантов. */
+/* Общие функции маршрутов: статусы, форматирование, запросы и подбор вариантов. */
 // Показывает пользователю краткое сообщение о текущем состоянии приложения.
 function setStatus(message) {
   statusElement.textContent = message;
@@ -7,7 +7,7 @@ function setStatus(message) {
 // Управляет этапами построения: активный этап крутится, завершённый получает галочку.
 // Если построение сорвалось, последний активный этап получает красный крестик без анимации.
 function setProgress(stage) {
-  const stages = ["point", "route", "score"];
+  const stages = ["point", "route", "variants"];
 
   if (stage === "idle") {
     currentProgressStage = "idle";
@@ -58,7 +58,6 @@ function updateRouteReasons(variant) {
   );
   const extraDistance = Math.round(variant.route.distance - shortestDistance);
   const reasons = [
-    `${variant.intersections} пересечений на маршруте`,
     `${variant.turns} поворотов по пути`,
   ];
 
@@ -142,8 +141,40 @@ async function requestRoutes(
   }
 }
 
+// Объединяет результаты разных запросов, не допуская одинаковой геометрии.
+function mergeUniqueRoutes(...routeGroups) {
+  const uniqueRoutes = new Map();
+
+  routeGroups.flat().forEach((route) => {
+    if (route?.geometry?.coordinates?.length) {
+      uniqueRoutes.set(routeSignature(route), route);
+    }
+  });
+
+  return [...uniqueRoutes.values()];
+}
+
+// Если обычный ответ проходит через красную линию, запрашивает варианты по обе стороны от неё.
+async function requestDangerRoadDetours(start, sourceRoutes, signal) {
+  const viaPoints = makeDangerRoadDetourPoints(sourceRoutes);
+
+  if (!viaPoints.length) return [];
+
+  const results = await Promise.allSettled(
+    viaPoints.map((viaPoint) => requestRoutes(start, signal, viaPoint)),
+  );
+
+  return filterRoutesAvoidingFixedDangerRoads(
+    results.flatMap((result) =>
+      result.status === "fulfilled" ? result.value.routes ?? [] : [],
+    ),
+  );
+}
+
 // Убирает пути, которые больше чем на 25% длиннее или медленнее лучшего варианта.
 function filterReasonableRoutes(routes) {
+  if (!routes.length) return [];
+
   const shortestDistance = Math.min(...routes.map((route) => route.distance));
   const fastestDuration = Math.min(...routes.map((route) => route.duration));
 

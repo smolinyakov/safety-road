@@ -1,4 +1,4 @@
-﻿/* Карта Leaflet, popup и визуальные дорожные знаки на карте. */
+/* Карта Leaflet, popup и визуальные дорожные знаки на карте. */
 .map-area {
   position: relative;
   min-height: 540px;
@@ -68,9 +68,6 @@
 .safety-sign--warning {
   background: #fff3cd;
 }
-.safety-sign--light {
-  background: #e6f4ea;
-}
 
 .safety-photo-placeholder {
   display: grid;
@@ -95,8 +92,11 @@
 .safety-sign--speed {
   color: #202124;
   background: #fff;
-  border: 4px solid #d93025;
-  font-size: 12px;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #d93025;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -135,4 +135,42 @@
 
 .map-area.is-placing-sign #map {
   cursor: crosshair;
+}
+
+.danger-road-segment {
+  cursor: pointer;
+}
+
+.danger-road-popup {
+  display: grid;
+  gap: 3px;
+  min-width: 190px;
+}
+
+.danger-road-popup strong {
+  color: #c5221f;
+  font-size: 14px;
+}
+
+.danger-road-popup span {
+  color: #202124;
+  font-weight: 700;
+}
+
+.danger-road-popup small {
+  color: #5f6368;
+  line-height: 1.35;
+}
+
+.danger-road-warning {
+  display: block;
+  width: 34px;
+  height: 30px;
+  filter: drop-shadow(0 2px 4px rgb(95 20 20 / 48%));
+}
+
+.danger-road-warning svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }

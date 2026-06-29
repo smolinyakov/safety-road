@@ -1,4 +1,4 @@
-﻿/* Отрисовка выбранного маршрута, карточек вариантов и основной сценарий построения. */
+/* Отрисовка выбранного маршрута, карточек вариантов и основной сценарий построения. */
 // На карте показывается только выбранный вариант, чтобы линии не перекрывали друг друга.
 function drawRouteVariants() {
   clearRouteLayers();
@@ -69,7 +69,7 @@ function renderRouteOptions() {
     title.textContent = `Вариант ${index + 1}`;
     badge.className = `badge ${variant.badgeClass}`;
     badge.textContent = variant.level;
-    details.textContent = `${formatDistance(variant.route.distance)} · ${formatDuration(variant.route.duration)} · ${variant.intersections} пересечений`;
+    details.textContent = `${formatDistance(variant.route.distance)} · ${formatDuration(variant.route.duration)}`;
 
     topLine.append(title, badge);
     button.append(topLine, details);
@@ -104,14 +104,30 @@ async function buildRoute(clickedPoint) {
       null,
       "true",
     );
-    const routes = filterReasonableRoutes(
-      (directData.routes ?? []).filter(
-        (route) => route.geometry?.coordinates?.length,
-      ),
+    const receivedRoutes = (directData.routes ?? []).filter(
+      (route) => route.geometry?.coordinates?.length,
+    );
+    let routes = filterReasonableRoutes(
+      filterRoutesAvoidingFixedDangerRoads(receivedRoutes),
     );
 
+    // Публичный OSRM не принимает зоны запрета напрямую. Если его обычные
+    // варианты пересекли красную линию, запрашиваем дополнительные пути через
+    // точки по обе стороны от опасного участка и снова проверяем геометрию.
+    if (routes.length < maximumReasonableRoutes) {
+      setStatus("Ищу путь в обход отмеченных опасных участков…");
+      const detours = await requestDangerRoadDetours(
+        clickedPoint,
+        receivedRoutes,
+        controller.signal,
+      );
+      routes = filterReasonableRoutes(
+        mergeUniqueRoutes(routes, detours),
+      ).slice(0, maximumReasonableRoutes);
+    }
+
     if (!routes.length) {
-      throw new Error("Пешеходный маршрут не найден");
+      throw new Error("Путь в обход отмеченных опасных участков не найден");
     }
 
     const snappedStart = directData.waypoints?.[0]?.location;
@@ -121,11 +137,12 @@ async function buildRoute(clickedPoint) {
 
       if (startMarker) {
         startMarker.setLatLng(snappedPoint);
-        startMarker.setZIndexOffset(3000);
+        // Точка отправления остаётся под школой и дорожными знаками при наложении.
+        startMarker.setZIndexOffset(-1000);
       } else {
         startMarker = L.marker(snappedPoint, {
           icon: startIcon,
-          zIndexOffset: 3000,
+          zIndexOffset: -1000,
         }).addTo(map);
       }
     }
@@ -133,8 +150,8 @@ async function buildRoute(clickedPoint) {
     updateAddressClearVisibility();
     void updateAddressInputFromPoint(startMarker?.getLatLng?.() ?? clickedPoint);
 
-    setProgress("score");
-    setStatus("Оцениваю варианты маршрута…");
+    setProgress("variants");
+    setStatus("Подбираю варианты маршрута…");
     routeVariants = assessRoutes(routes);
     selectedRouteIndex = 0;
     renderRouteOptions();
