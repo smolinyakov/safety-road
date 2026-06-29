@@ -23,15 +23,24 @@
     <span class="share-route-text">Поделиться маршрутом</span>
   `;
 
+  const mobileQrButton = document.createElement("button");
+  mobileQrButton.type = "button";
+  mobileQrButton.className = "mobile-route-qr-button";
+  mobileQrButton.hidden = true;
+  mobileQrButton.setAttribute("aria-label", "Показать QR-код маршрута");
+  mobileQrButton.innerHTML = `<img class="mobile-route-qr-icon" src="images/share/qr.png" alt="" />`;
+
   const shareHost = document.getElementById("share-button-host");
   const routesSection = document.getElementById("route-options-section");
   const mobileShareQuery = window.matchMedia("(max-width: 760px)");
   let qrFile = null;
 
-  shareHost?.appendChild(button);
+  shareHost?.append(button, mobileQrButton);
 
   function updateShareButtonVisibility() {
-    button.hidden = !routesSection || routesSection.hidden;
+    const shouldHide = !routesSection || routesSection.hidden;
+    button.hidden = shouldHide;
+    mobileQrButton.hidden = shouldHide;
   }
 
   updateShareButtonVisibility();
@@ -144,13 +153,17 @@
     return url;
   }
 
-  function openModal() {
+  function openModal({ qrOnly = false } = {}) {
     prepareShareData();
 
     if (nativeShareButton) {
       nativeShareButton.hidden = typeof navigator.share !== "function";
     }
 
+    modal.classList.toggle(
+      "is-mobile-qr-only",
+      qrOnly && mobileShareQuery.matches,
+    );
     modal.hidden = false;
     document.body.classList.add("modal-open");
     modal.querySelector(".route-share-close")?.focus({ preventScroll: true });
@@ -158,6 +171,7 @@
 
   function closeModal() {
     modal.hidden = true;
+    modal.classList.remove("is-mobile-qr-only");
     document.body.classList.remove("modal-open");
     button.focus({ preventScroll: true });
   }
@@ -239,6 +253,7 @@
   }
 
   button.addEventListener("click", handleShareButtonClick);
+  mobileQrButton.addEventListener("click", () => openModal({ qrOnly: true }));
   closeButtons.forEach((item) => item.addEventListener("click", closeModal));
   modal.addEventListener("click", (event) => {
     if (event.target === modal) closeModal();

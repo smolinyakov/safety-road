@@ -42,6 +42,11 @@
   display: none;
 }
 
+/* Отдельная QR-кнопка нужна только в мобильной раскладке. */
+.mobile-route-qr-button {
+  display: none;
+}
+
 /* Модальное окно и его десктопная раскладка. */
 .route-share-modal {
   position: fixed;
@@ -342,6 +347,22 @@
     font-size: 11px;
   }
 
+  /* QR-кнопка открывает на телефоне компактное окно только с самим кодом. */
+  .route-share-modal.is-mobile-qr-only .route-share-options,
+  .route-share-modal.is-mobile-qr-only .route-share-link-row,
+  .route-share-modal.is-mobile-qr-only .route-share-status {
+    display: none;
+  }
+
+  .route-share-modal.is-mobile-qr-only .route-share-dialog {
+    width: min(88vw, 300px);
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .route-share-modal.is-mobile-qr-only .route-share-content {
+    display: block;
+  }
+
   /* Та же кнопка становится плавающей справа над нижней панелью. */
   .share-route-button {
     position: fixed;
@@ -403,7 +424,65 @@
     transition: none;
   }
 
-  .share-route-button[hidden] {
+  /* Компактная пара кнопок справа: QR сверху, системная отправка снизу. */
+  .share-route-button {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    border-radius: 11px;
+  }
+
+  .share-route-button .share-route-icon,
+  .share-route-button .share-route-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-route-qr-button {
+    position: fixed;
+    z-index: 1100;
+    right: 14px;
+    bottom: calc(
+      var(
+          --mobile-sheet-current-height,
+          calc(
+            var(--mobile-collapsed-sheet, 126px) +
+              var(--mobile-safe-bottom, env(safe-area-inset-bottom))
+          )
+        ) + var(--mobile-sheet-share-gap, 14px) + 50px
+    );
+    display: grid;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+    background: #1a73e8;
+    border: 0;
+    border-radius: 11px;
+    box-shadow: 0 4px 12px rgb(15 27 45 / 14%);
+    place-items: center;
+    transition: bottom 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mobile-route-qr-icon {
+    display: block;
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .sidebar.is-mobile-dragging .mobile-route-qr-button {
+    transition: none;
+  }
+
+  .share-route-button[hidden],
+  .mobile-route-qr-button[hidden] {
     display: none;
   }
 }

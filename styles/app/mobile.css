@@ -206,19 +206,24 @@
     display: grid;
     flex: 0 0 auto;
     width: 100%;
-    min-height: 36px;
+    min-height: 28px;
     color: #1f2a44;
     cursor: pointer;
     background: #fff;
     border: 0;
-    place-items: center;
+    align-items: center;
+    justify-items: start;
     font: inherit;
     font-size: 14px;
     font-weight: 900;
-    padding: 13px 24px 2px;
+    padding: 0 14px;
+    overflow: hidden;
     line-height: 1.05;
+    text-align: left;
+    text-overflow: ellipsis;
     touch-action: none;
     user-select: none;
+    white-space: nowrap;
   }
 
   .mobile-sheet-toggle span {
@@ -227,14 +232,24 @@
 
   .mobile-sheet-toggle::after {
     position: absolute;
-    top: 3px;
+    top: 4px;
     left: 50%;
     width: 8px;
     height: 8px;
     border-right: 2px solid #202124;
     border-bottom: 2px solid #202124;
+    display: none;
     content: "";
     transform: translateX(-50%) rotate(225deg);
+  }
+
+  body.has-start-point .mobile-sheet-toggle {
+    min-height: 44px;
+    padding: 20px 14px 5px;
+  }
+
+  body.has-start-point .mobile-sheet-toggle::after {
+    display: block;
   }
 
   .sidebar.is-mobile-expanded .mobile-sheet-toggle::after {
@@ -245,10 +260,15 @@
     position: sticky;
     z-index: 20;
     top: -8px;
+    width: calc(100% + 24px);
     margin: -8px -12px 4px;
-    padding: 13px 12px 5px;
+    padding: 8px 14px 7px;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 8px 14px rgb(255 255 255 / 94%);
+  }
+
+  body.has-start-point .sidebar.is-mobile-expanded .mobile-sheet-toggle {
+    padding: 20px 14px 5px;
   }
 
   .address-section {
