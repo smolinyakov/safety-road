@@ -412,6 +412,7 @@ function clearStartPoint() {
   clearManualSigns();
   routeVariants = [];
   selectedRouteIndex = 0;
+  routeReasonsElement.replaceChildren();
   routeReasonsElement.hidden = true;
   optionsSection.hidden = true;
   updateAddressClearVisibility();
