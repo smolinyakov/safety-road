@@ -1,5 +1,5 @@
-/* Реальные объекты OSM рядом с маршрутом: Overpass, фильтрация и отображение знаков. */
-// Удаляет реальные знаки предыдущего маршрута и отменяет незавершённый запрос к Overpass.
+/* Объекты безопасности OSM: загрузка через Overpass, фильтрация и слой Leaflet. */
+// Сбрасывает слой предыдущего маршрута и отменяет активный запрос Overpass.
 function clearSafetyMarkers() {
   if (activeSafetyRequest) {
     activeSafetyRequest.abort();
@@ -9,9 +9,9 @@ function clearSafetyMarkers() {
   safetyMarkers.forEach((marker) => map.removeLayer(marker));
   safetyMarkers = [];
 }
-// Мелкие дорожные детали не показываем на общем плане: они появляются при приближении карты.
-const detailedSafetyMarkerMinZoom = 13;
-const speedMarkerMinZoom = 13;
+// На 14-м зуме и ниже маркеры скрыты, чтобы не перегружать общий план.
+const detailedSafetyMarkerMinZoom = 15;
+const speedMarkerMinZoom = 15;
 
 function isDetailedSafetyMarker(type) {
   return type === "crossing" || type === "light";
@@ -51,9 +51,9 @@ function updateSafetyMarkersVisibility() {
   });
 }
 
-// Создаёт значок объекта безопасности для маркера Leaflet.
+// Возвращает Leaflet-иконку для выбранного типа объекта.
 function createSafetyIcon(symbol, type) {
-  // PNG подключаем через L.icon, чтобы одинаковые изображения использовались на карте и в меню.
+  // Переход и светофор используют те же PNG, что и панель ручных знаков.
   if (type === "crossing" || type === "light") {
     const isTrafficLight = type === "light";
     const iconSize = isTrafficLight ? 20 : 26;
@@ -345,7 +345,7 @@ function refreshSafetyMarkers() {
     map.invalidateSize({ pan: false, debounceMoveend: true });
   });
 }
-// Показывает на карте только реальные объекты OSM, расположенные рядом с выбранным маршрутом.
+// Загружает и отображает объекты, относящиеся к текущему варианту маршрута.
 async function drawSafetyMarkers(variant) {
   clearSafetyMarkers();
 
@@ -356,7 +356,7 @@ async function drawSafetyMarkers(variant) {
   try {
     const objects = await loadSafetyObjects(variant.route);
 
-    // Пользователь мог уже выбрать другой вариант, пока шёл запрос к Overpass.
+    // Игнорируем ответ, если за время запроса пользователь сменил маршрут.
     if (
       controller.signal.aborted ||
       routeKey !== routeSignature(routeVariants[selectedRouteIndex].route)
@@ -367,20 +367,16 @@ async function drawSafetyMarkers(variant) {
     objects.forEach((item) => {
       const marker = L.marker([item.point[1], item.point[0]], {
         icon: createSafetyIcon(item.symbol, item.type),
-        // Светофор важнее визуально и должен перекрывать переход при совпадении точек.
+        // Светофор перекрывает переход при совпадении координат.
         zIndexOffset: item.type === "light" ? 1000 : 0,
       });
       marker.safetyType = item.type;
       syncSafetyMarkerVisibility(marker, item.type);
 
-      // В прототипе оставляем место под будущую фотографию реального участка.
+      // Popup содержит только подтверждённое название объекта из OSM.
       marker.bindPopup(`
         <div class="safety-popup">
           <strong>${item.title}</strong>
-          <div class="safety-photo-placeholder" aria-label="Заглушка фотографии участка">
-            <span aria-hidden="true">📷</span>
-            <small>Фото участка</small>
-          </div>
         </div>
       `);
 
@@ -399,5 +395,5 @@ async function drawSafetyMarkers(variant) {
   }
 }
 
-// При изменении масштаба показываем или скрываем детальные дорожные знаки.
+// Синхронизируем видимость знаков после изменения масштаба.
 map.on("zoomend", updateSafetyMarkersVisibility);

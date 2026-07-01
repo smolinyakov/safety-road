@@ -1,5 +1,5 @@
-﻿/* Инициализация событий интерфейса, клики по карте, очистка маршрута и восстановление QR-ссылки. */
-// Поддерживаем поиск как кнопкой, так и клавишей Enter.
+/* События интерфейса, мобильная панель и восстановление маршрута из ссылки. */
+// Submit покрывает кнопку поиска и Enter в поле адреса.
 addressForm.addEventListener("submit", (event) => {
   event.preventDefault();
   clearTimeout(addressSearchTimer);
@@ -13,7 +13,7 @@ addressForm.addEventListener("submit", (event) => {
   openMobileSheetForAddressSearch();
   void searchAddressSuggestions(query);
 });
-// Автоподсказки запускаются после короткой паузы, чтобы не делать запрос на каждую букву.
+// Debounce сокращает число запросов Nominatim при быстром вводе.
 addressInput.addEventListener("input", () => {
   clearTimeout(addressSearchTimer);
   clearAddressSuggestions();
@@ -37,17 +37,17 @@ addressInput.addEventListener("focus", () => {
     openMobileSheetForAddressSearch();
   }
 });
-// Стрелка в карточке школы раскрывает список школ и лицеев.
+// Переключение списка школ из верхней карточки.
 schoolPickerButton.addEventListener("click", () => {
   setSchoolPickerOpen(schoolPickerPanel.hidden);
 });
 
-// Поиск внутри списка фильтрует локальный набор школ без обращения к сети.
+// Список школ фильтруется локально.
 schoolSearchInput.addEventListener("input", () => {
   renderSchoolList(schoolSearchInput.value);
 });
 
-// Клик вне выпадающего списка закрывает его.
+// Закрываем список школы по клику вне компонента.
 document.addEventListener("click", (event) => {
   const isClickInsidePicker =
     schoolPickerButton.contains(event.target) ||
@@ -58,7 +58,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Горячие клавиши: Ctrl/Cmd+Z удаляет последний ручной знак, Escape закрывает список школ.
+// Ctrl/Cmd+Z отменяет последний знак; Escape закрывает список школ.
 document.addEventListener(
   "keydown",
   (event) => {
@@ -110,10 +110,6 @@ function setMobileAddressSearchActive(isActive) {
   sidebar.classList.toggle("is-mobile-address-searching", Boolean(isActive));
 }
 
-function hasActiveMobileAddressSearch() {
-  return Boolean(sidebar?.classList.contains("is-mobile-address-searching"));
-}
-
 function openMobileSheetForAddressSearch() {
   if (!mobileSheetQuery.matches) return;
 
@@ -123,33 +119,41 @@ function openMobileSheetForAddressSearch() {
 
 window.setMobileAddressSearchActive = setMobileAddressSearchActive;
 
-function normalizeMobileSheetState(state) {
-  return state === "expanded" && !startMarker && !hasActiveMobileAddressSearch()
-    ? "collapsed"
-    : state;
-}
-
 function updateMobileSheetAttachedControls(height) {
   if (!mobileSheetQuery.matches || !Number.isFinite(height)) return;
 
   sidebar.style.setProperty("--mobile-sheet-current-height", `${height}px`);
 }
 
-function applyMobileSheetState(state) {
-  const normalizedState = normalizeMobileSheetState(state);
+// Плавающие QR/share-кнопки всегда опираются на фактическую высоту панели.
+if ("ResizeObserver" in window) {
+  const mobileSheetResizeObserver = new ResizeObserver(() => {
+    if (
+      !mobileSheetQuery.matches ||
+      sidebar.classList.contains("is-mobile-dragging")
+    ) {
+      return;
+    }
 
-  sidebar.classList.toggle("is-mobile-hidden", normalizedState === "hidden");
-  sidebar.classList.toggle("is-mobile-expanded", normalizedState === "expanded");
+    updateMobileSheetAttachedControls(sidebar.getBoundingClientRect().height);
+  });
+
+  mobileSheetResizeObserver.observe(sidebar);
+}
+
+function applyMobileSheetState(state) {
+  sidebar.classList.toggle("is-mobile-hidden", state === "hidden");
+  sidebar.classList.toggle("is-mobile-expanded", state === "expanded");
   mobileSheetToggle.setAttribute(
     "aria-expanded",
-    String(normalizedState === "expanded"),
+    String(state === "expanded"),
   );
   mobileSheetToggle.lastChild.textContent =
-    normalizedState === "hidden"
+    state === "hidden"
       ? "Открыть панель"
       : "Введите название улицы или места";
 
-  return normalizedState;
+  return state;
 }
 
 function finishMobileSheetSnap(targetHeight) {
@@ -165,11 +169,9 @@ function finishMobileSheetSnap(targetHeight) {
 function setMobileSheetState(state, options = {}) {
   if (!sidebar || !mobileSheetToggle) return;
 
-  const normalizedState = normalizeMobileSheetState(state);
-
   if (!mobileSheetQuery.matches) {
     sidebar.style.removeProperty("height");
-    applyMobileSheetState(normalizedState);
+    applyMobileSheetState(state);
     setTimeout(() => map.invalidateSize(), 220);
     return;
   }
@@ -178,13 +180,13 @@ function setMobileSheetState(state, options = {}) {
   const startHeight = Number.isFinite(options.fromHeight)
     ? options.fromHeight
     : sidebar.getBoundingClientRect().height;
-  const targetHeight = measureMobileSheetHeight(normalizedState);
+  const targetHeight = measureMobileSheetHeight(state);
 
   window.clearTimeout(mobileSheetDrag.snapTimer);
   sidebar.classList.remove("is-mobile-dragging");
   sidebar.style.height = `${startHeight}px`;
   updateMobileSheetAttachedControls(startHeight);
-  applyMobileSheetState(normalizedState);
+  applyMobileSheetState(state);
 
   if (!shouldAnimate || Math.abs(startHeight - targetHeight) < 1) {
     sidebar.classList.remove("is-mobile-snapping");
@@ -233,9 +235,7 @@ function getMobileSheetHeights() {
 }
 
 function clampMobileSheetHeight(height, heights) {
-  const canExpand = startMarker || hasActiveMobileAddressSearch();
-  const maxHeight = canExpand ? heights.expanded : heights.collapsed;
-  return Math.min(Math.max(height, heights.hidden), maxHeight);
+  return Math.min(Math.max(height, heights.hidden), heights.expanded);
 }
 
 mobileSheetToggle?.addEventListener("click", () => {
@@ -245,11 +245,6 @@ mobileSheetToggle?.addEventListener("click", () => {
   }
 
   if (getMobileSheetState() === "hidden") {
-    setMobileSheetState("collapsed");
-    return;
-  }
-
-  if (!startMarker && !hasActiveMobileAddressSearch()) {
     setMobileSheetState("collapsed");
     return;
   }
@@ -297,8 +292,7 @@ mobileSheetToggle?.addEventListener("pointermove", (event) => {
   sidebar.classList.remove("is-mobile-hidden");
   sidebar.classList.toggle(
     "is-mobile-expanded",
-    (startMarker || hasActiveMobileAddressSearch()) &&
-      nextHeight > heights.collapsed + 24,
+    nextHeight > heights.collapsed + 24,
   );
   sidebar.style.height = `${nextHeight}px`;
   updateMobileSheetAttachedControls(nextHeight);
@@ -317,7 +311,7 @@ mobileSheetToggle?.addEventListener("pointerup", (event) => {
 
   if (height <= hiddenLimit) {
     targetState = "hidden";
-  } else if ((startMarker || hasActiveMobileAddressSearch()) && height >= expandedLimit) {
+  } else if (height >= expandedLimit) {
     targetState = "expanded";
   }
 
@@ -343,9 +337,7 @@ mobileSheetToggle?.addEventListener("pointercancel", (event) => {
   mobileSheetDrag.pointerId = null;
   mobileSheetDrag.heights = null;
 });
-// На телефонах Leaflet слушает жесты на всей карте. Если свайп начинается
-// на нижней панели, останавливаем всплытие события, чтобы вместо карты
-// прокручивалась сама панель маршрута.
+// Не передаём Leaflet жесты, начавшиеся внутри мобильной панели.
 ["click", "pointerdown", "pointermove", "touchstart", "touchmove", "wheel"].forEach(
   (eventName) => {
     sidebar.addEventListener(
@@ -379,7 +371,7 @@ signOptionButtons.forEach((button) => {
   });
 });
 initializeSchoolPicker();
-// Клик по карте — альтернативный способ выбрать стартовую точку.
+// Клик по карте ставит знак в активном режиме или выбирает стартовую точку.
 map.on("click", (event) => {
   if (isAddingManualSign) {
     addManualSign(event.latlng);
@@ -390,7 +382,7 @@ map.on("click", (event) => {
   buildRoute(event.latlng);
 });
 
-// Полностью очищает пользовательскую точку, адрес в строке поиска и результат маршрута.
+// Сбрасывает стартовую точку и всё состояние, зависящее от маршрута.
 function clearStartPoint() {
   if (activeRouteRequest) {
     activeRouteRequest.abort();
@@ -422,7 +414,6 @@ function clearStartPoint() {
   selectedRouteIndex = 0;
   routeReasonsElement.hidden = true;
   optionsSection.hidden = true;
-  updateManualSignsPanelVisibility();
   updateAddressClearVisibility();
   document.body.classList.remove("has-start-point");
   setMobileSheetState("collapsed");
@@ -435,7 +426,7 @@ addressClearButton?.addEventListener("click", () => {
   addressInput.focus({ preventScroll: true });
 });
 
-// Формирует ссылку для QR-кода: сохраняет стартовую точку и выбранный вариант.
+// Формирует ссылку со стартовой точкой, вариантом маршрута и ручными знаками.
 window.getShareRouteUrl = function getShareRouteUrl() {
   const shareUrl = new URL(window.location.href);
   shareUrl.searchParams.delete("start");
@@ -461,7 +452,7 @@ window.getShareRouteUrl = function getShareRouteUrl() {
   return shareUrl.toString();
 };
 
-// При открытии ссылки из QR-кода повторно строим маршрут от сохранённой точки.
+// Восстанавливает маршрут и знаки из query-параметров.
 async function restoreSharedRouteFromUrl() {
   const urlParameters = new URLSearchParams(window.location.search);
   const savedStart = urlParameters.get("start");
@@ -508,9 +499,3 @@ window.addEventListener("load", () => {
   disableAddressInputCache();
   void restoreSharedRouteFromUrl();
 });
-
-
-
-
-
-

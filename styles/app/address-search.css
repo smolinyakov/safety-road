@@ -1,4 +1,4 @@
-﻿/* Поиск адреса и динамические подсказки геокодера. */
+/* Форма адреса и список подсказок Nominatim. */
 .address-form {
   display: flex;
   align-items: center;
@@ -109,9 +109,6 @@
   overscroll-behavior: contain;
   background: #fff;
   -webkit-overflow-scrolling: touch;
-  /* border: 1px solid var(--line); */
-  /* border-radius: 8px; */
-  /* box-shadow: 0 2px 6px rgb(60 64 67 / 16%); */
 }
 
 .address-suggestion {
@@ -143,11 +140,3 @@
   background: #fef7e0;
   font-weight: 800;
 }
-
-
-
-
-
-
-
-

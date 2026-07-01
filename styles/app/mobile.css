@@ -187,7 +187,8 @@
   }
 
   body:not(.has-start-point) .sidebar.is-mobile-expanded {
-    height: min(68dvh, 560px);
+    --mobile-sheet-current-height: auto;
+    height: auto;
     max-height: calc(100dvh - var(--mobile-safe-top) - 86px);
     overflow-x: hidden;
     overflow-y: auto;
@@ -206,20 +207,20 @@
     display: grid;
     flex: 0 0 auto;
     width: 100%;
-    min-height: 28px;
+    min-height: 44px;
     color: #1f2a44;
     cursor: pointer;
     background: #fff;
     border: 0;
     align-items: center;
-    justify-items: start;
+    justify-items: center;
     font: inherit;
     font-size: 14px;
     font-weight: 900;
-    padding: 0 14px;
+    padding: 20px 14px 5px;
     overflow: hidden;
     line-height: 1.05;
-    text-align: left;
+    text-align: center;
     text-overflow: ellipsis;
     touch-action: none;
     user-select: none;
@@ -238,18 +239,9 @@
     height: 8px;
     border-right: 2px solid #202124;
     border-bottom: 2px solid #202124;
-    display: none;
+    display: block;
     content: "";
     transform: translateX(-50%) rotate(225deg);
-  }
-
-  body.has-start-point .mobile-sheet-toggle {
-    min-height: 44px;
-    padding: 20px 14px 5px;
-  }
-
-  body.has-start-point .mobile-sheet-toggle::after {
-    display: block;
   }
 
   .sidebar.is-mobile-expanded .mobile-sheet-toggle::after {
@@ -262,13 +254,9 @@
     top: -8px;
     width: calc(100% + 24px);
     margin: -8px -12px 4px;
-    padding: 8px 14px 7px;
+    padding: 20px 14px 5px;
     border-radius: 22px 22px 0 0;
     box-shadow: 0 8px 14px rgb(255 255 255 / 94%);
-  }
-
-  body.has-start-point .sidebar.is-mobile-expanded .mobile-sheet-toggle {
-    padding: 20px 14px 5px;
   }
 
   .address-section {
@@ -292,7 +280,10 @@
     box-shadow: none;
   }
 
-  .address-form input,
+  .address-form input {
+    font-size: 14px;
+  }
+
   .school-search-input {
     font-size: 16px;
   }
@@ -342,9 +333,10 @@
   .sidebar.is-mobile-address-searching > #route-options-section,
   .sidebar.is-mobile-address-searching > .share-button-host,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .route-build-section,
-  body:not(.has-start-point) .sidebar.is-mobile-expanded > .manual-signs-panel,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > #route-options-section,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .share-button-host,
+  body:not(.has-start-point) .sidebar.is-mobile-expanded > .legend,
+  body:not(.has-start-point) .sidebar.is-mobile-expanded > .risk-help,
   .sidebar.is-mobile-hidden > .address-section,
   .sidebar.is-mobile-hidden > section:not(.address-section),
   .sidebar.is-mobile-hidden > #route-options-section,
@@ -545,7 +537,7 @@
   body:not(.has-start-point) .sidebar.is-mobile-expanded {
     height: auto;
     max-height: calc(100dvh - var(--mobile-safe-top) - 86px);
-    overflow-y: visible;
+    overflow-y: auto;
   }
   .sidebar.is-mobile-expanded {
     height: min(70dvh, 520px);

@@ -1,4 +1,4 @@
-/* Кнопка открытия окна «Поделиться». */
+/* Кнопки share/QR и модальное окно маршрута. */
 .share-route-button {
   display: inline-flex;
   gap: 8px;
@@ -42,12 +42,12 @@
   display: none;
 }
 
-/* Отдельная QR-кнопка нужна только в мобильной раскладке. */
+/* QR-кнопка по умолчанию скрыта и включается мобильным media query. */
 .mobile-route-qr-button {
   display: none;
 }
 
-/* Модальное окно и его десктопная раскладка. */
+/* Десктопная раскладка модального окна. */
 .route-share-modal {
   position: fixed;
   z-index: 3000;
@@ -290,7 +290,7 @@
   overflow: hidden;
 }
 
-/* На телефоне QR и способы отправки располагаются друг под другом. */
+/* Мобильная раскладка модального окна. */
 @media (max-width: 760px) {
   .route-share-modal {
     padding: 10px;
@@ -347,7 +347,7 @@
     font-size: 11px;
   }
 
-  /* QR-кнопка открывает на телефоне компактное окно только с самим кодом. */
+  /* Компактный QR-режим скрывает остальные действия. */
   .route-share-modal.is-mobile-qr-only .route-share-options,
   .route-share-modal.is-mobile-qr-only .route-share-link-row,
   .route-share-modal.is-mobile-qr-only .route-share-status {
@@ -363,7 +363,7 @@
     display: block;
   }
 
-  /* Та же кнопка становится плавающей справа над нижней панелью. */
+  /* Кнопка закреплена над нижней панелью. */
   .share-route-button {
     position: fixed;
     z-index: 1100;
@@ -424,7 +424,7 @@
     transition: none;
   }
 
-  /* Компактная пара кнопок справа: QR сверху, системная отправка снизу. */
+  /* QR и системный share собраны в вертикальную пару. */
   .share-route-button {
     width: 42px;
     min-width: 42px;

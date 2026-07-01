@@ -1,5 +1,5 @@
-/* Ручные дорожные знаки: добавление, удаление, очистка и сохранение в ссылке. */
-// Типы знаков, которые пользователь может поставить вручную на карту.
+/* Пользовательские дорожные знаки и их сериализация в ссылку маршрута. */
+// Конфигурация доступных типов знаков.
 const manualSignTypes = {
   crossing: {
     symbol: "🚶",
@@ -19,23 +19,19 @@ const manualSignTypes = {
   },
 };
 
-// Создаёт содержимое popup для ручного знака с кнопкой удаления.
+// Popup оставляем компактным: фотографий у пользовательских знаков пока нет.
 function makeManualSignPopup(sign) {
   const title = manualSignTypes[sign.type]?.title ?? "Дорожный знак";
 
   return `
     <div class="safety-popup">
       <strong>${title}</strong>
-      <div class="safety-photo-placeholder" aria-label="Заглушка фотографии участка">
-        <span aria-hidden="true">📷</span>
-        <small>Фото участка</small>
-      </div>
       <button class="manual-sign-remove" type="button" data-manual-sign-id="${sign.id}">Удалить знак</button>
     </div>
   `;
 }
 
-// Перерисовывает ручные знаки: они не зависят от выбранного маршрута и не удаляются при смене варианта.
+// Пересоздаёт маркеры после восстановления состояния или изменения набора знаков.
 function renderManualSigns() {
   manualSigns.forEach((sign) => {
     if (sign.marker) {
@@ -65,7 +61,7 @@ function renderManualSigns() {
   });
 }
 
-// Добавляет пользовательский знак в выбранной точке карты.
+// Сохраняет новый знак и синхронизирует слой карты.
 function addManualSign(latlng, type = selectedManualSignType) {
   manualSigns.push({
     id: window.crypto?.randomUUID
@@ -79,7 +75,7 @@ function addManualSign(latlng, type = selectedManualSignType) {
   renderManualSigns();
 }
 
-// Удаляет последний поставленный пользователем знак. Используется для Ctrl+Z.
+// Удаляет последний знак для Ctrl/Cmd+Z.
 function undoLastManualSign() {
   const lastSign = manualSigns[manualSigns.length - 1];
 
@@ -88,7 +84,7 @@ function undoLastManualSign() {
   }
 }
 
-// Удаляет конкретный пользовательский знак.
+// Удаляет знак из состояния и со слоя Leaflet.
 function removeManualSign(id) {
   const sign = manualSigns.find((item) => item.id === id);
 
@@ -99,7 +95,7 @@ function removeManualSign(id) {
   manualSigns = manualSigns.filter((item) => item.id !== id);
 }
 
-// Полностью очищает пользовательские знаки. Обычно также выключает режим постановки.
+// Очищает слой и при необходимости завершает режим постановки.
 function clearManualSigns(shouldExitMode = true) {
   manualSigns.forEach((sign) => {
     if (sign.marker) {
@@ -113,20 +109,7 @@ function clearManualSigns(shouldExitMode = true) {
   }
 }
 
-// Показывает панель ручных знаков только когда маршрут уже построен.
-function updateManualSignsPanelVisibility() {
-  if (!manualSignsPanel) return;
-
-  const hasRoute = routeVariants.length > 0;
-
-  manualSignsPanel.hidden = !hasRoute;
-
-  if (!hasRoute) {
-    setManualSignMode(false);
-  }
-}
-
-// Включает или выключает режим постановки знака кликом по карте.
+// Переключает режим постановки знака кликом по карте.
 function setManualSignMode(isActive) {
   isAddingManualSign = isActive;
   signPicker.hidden = !isActive;
@@ -135,14 +118,14 @@ function setManualSignMode(isActive) {
   mapArea?.classList.toggle("is-placing-sign", isActive);
 }
 
-// Кодирует ручные знаки компактно для ссылки/QR-кода.
+// Кодирует знаки в компактный параметр ссылки.
 function serializeManualSigns() {
   return manualSigns
     .map((sign) => `${sign.type}:${sign.lat.toFixed(6)},${sign.lng.toFixed(6)}`)
     .join(";");
 }
 
-// Восстанавливает ручные знаки из ссылки.
+// Восстанавливает знаки из параметра ссылки, пропуская повреждённые записи.
 function restoreManualSignsFromUrl() {
   const rawSigns = new URLSearchParams(window.location.search).get("signs");
 

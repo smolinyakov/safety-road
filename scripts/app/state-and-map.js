@@ -1,37 +1,35 @@
-/* Базовая конфигурация, карта Leaflet, DOM-ссылки и общее состояние приложения. */
-// Школа по умолчанию нужна сразу при старте карты и как запасной вариант,
-// если внешний сервис OpenStreetMap временно не ответит.
+/* Конфигурация Leaflet, ссылки на DOM и общее состояние модулей. */
+// Школа №85 используется до загрузки локальной базы и как fallback.
 const defaultSchool = {
   name: "МБОУ СОШ №85",
   address: "ул. Малиновского, 19 · Хабаровск",
   coordinates: [48.3820134, 135.1191731],
 };
 
-// Список учреждений берём из локального файла scripts/schools-data.js.
-// Если файл не подключился, остаётся запасная школа №85.
+// schools-data.js подключается раньше модулей приложения.
 let khabarovskSchools = Array.isArray(window.KHABAROVSK_SCHOOLS)
   ? window.KHABAROVSK_SCHOOLS
   : [defaultSchool];
 
-// Текущая школа назначения. По умолчанию выбираем школу №85 из локальной базы.
+// Текущая школа назначения.
 let selectedSchool =
   khabarovskSchools.find((item) => /№\s*85|#\s*85|\b85\b/i.test(item.name)) ??
   defaultSchool;
 let school = selectedSchool.coordinates;
-// Внешние сервисы OpenStreetMap: маршрутизация и поиск адресов.
+// Внешние endpoints маршрутизации, геокодинга и Overpass.
 const routingService =
   "https://routing.openstreetmap.de/routed-foot/route/v1/driving";
 const geocodingService = "https://nominatim.openstreetmap.org/search";
 const overpassService = "https://overpass-api.de/api/interpreter";
 const maximumReasonableRoutes = 3;
 
-// Создаём карту и задаём начальный вид на район школы.
+// Начальный viewport привязан к школе по умолчанию.
 const map = L.map("map", {
   zoomControl: false,
   attributionControl: false,
 }).setView(school, 15.6);
 
-// Оставляем обязательную атрибуцию OSM, но убираем стандартный префикс Leaflet.
+// Атрибуция OSM обязательна; префикс Leaflet не показываем.
 L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
 
 L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -41,7 +39,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
 
-// Для точки отправления и школы используются готовые PNG из папки images.
+// Иконки старта и школы хранятся локально в images.
 const schoolIcon = L.icon({
   iconUrl: "images/school.png",
   iconSize: [48, 48],
@@ -56,10 +54,10 @@ const startIcon = L.icon({
   popupAnchor: [0, -34],
 });
 
-// Маркер школы постоянный: его нельзя удалить вместе с точкой пользователя.
+// Маркер школы живёт независимо от стартовой точки.
 const schoolMarker = L.marker(school, { icon: schoolIcon }).addTo(map);
 
-// Ссылки на элементы интерфейса получаем один раз после загрузки страницы.
+// DOM-ссылки кэшируем при инициализации модулей.
 const statusElement = document.getElementById("route-status");
 const optionsSection = document.getElementById("route-options-section");
 const optionsElement = document.getElementById("route-options");
@@ -79,7 +77,7 @@ const selectedSchoolNameElement = document.getElementById(
 const selectedSchoolAddressElement = document.getElementById(
   "selected-school-address",
 );
-const manualSignsPanel = document.querySelector(".manual-signs-panel");
+
 const addSignToggle = document.getElementById("add-sign-toggle");
 const signPicker = document.getElementById("sign-picker");
 const cancelSignModeButton = document.getElementById("cancel-sign-mode");
@@ -89,7 +87,7 @@ const mapArea = document.querySelector(".map-area");
 const sidebar = document.querySelector(".sidebar");
 const mobileSheetToggle = document.getElementById("mobile-sheet-toggle");
 
-// Изменяемое состояние: текущая точка отправления, линии и незавершённые запросы.
+// Состояние маршрута, слоёв и активных сетевых запросов.
 let startMarker;
 let routeLine;
 let routeLayers = [];
@@ -108,9 +106,7 @@ let selectedManualSignType = "crossing";
 let manualSigns = [];
 let shouldRestoreManualSignsFromUrl = false;
 
-// Нормализует текстовый OSM-тег: убирает лишние пробелы и пустые значения.
+// Нормализует необязательные строковые теги OSM.
 function normalizeOsmText(value) {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
 }
-
-

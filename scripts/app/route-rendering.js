@@ -1,5 +1,5 @@
-/* Отрисовка выбранного маршрута, карточек вариантов и основной сценарий построения. */
-// На карте показывается только выбранный вариант, чтобы линии не перекрывали друг друга.
+/* Построение маршрутов и синхронизация выбранного варианта с интерфейсом. */
+// На карте одновременно держим только выбранный вариант.
 function drawRouteVariants() {
   clearRouteLayers();
   routeLine = null;
@@ -33,7 +33,7 @@ function drawRouteVariants() {
   routeLine = line;
   void drawSafetyMarkers(variant);
 }
-// Синхронизирует выбранный маршрут на карте, в списке и в текстовом объяснении.
+// Применяет вариант к карте, карточкам и пояснению оценки.
 function showSelectedRoute(index, shouldFit = true) {
   selectedRouteIndex = index;
   const variant = routeVariants[index];
@@ -52,7 +52,7 @@ function showSelectedRoute(index, shouldFit = true) {
   }
 }
 
-// Создаёт кнопки вариантов через DOM API, чтобы внешний текст не вставлялся как HTML.
+// Создаёт карточки вариантов без вставки внешних данных через innerHTML.
 function renderRouteOptions() {
   optionsElement.replaceChildren();
 
@@ -78,19 +78,24 @@ function renderRouteOptions() {
   });
 
   optionsSection.hidden = false;
-  updateManualSignsPanelVisibility();
 }
-// Главный сценарий: отменяет старый запрос, строит первый путь и затем ищет альтернативы.
+// Перезапускает построение и собирает набор разумных альтернатив.
 async function buildRoute(clickedPoint) {
+  // При первой точке сохраняем знаки, которые пользователь поставил заранее.
+  // При смене уже существующей точки старые пользовательские знаки сбрасываются.
+  const shouldResetManualSigns = Boolean(startMarker || routeVariants.length);
   if (activeRouteRequest) {
     activeRouteRequest.abort();
   }
 
   const controller = new AbortController();
   activeRouteRequest = controller;
-  clearManualSigns();
+  if (shouldResetManualSigns) {
+    clearManualSigns();
+  } else {
+    setManualSignMode(false);
+  }
   optionsSection.hidden = true;
-  updateManualSignsPanelVisibility();
   routeReasonsElement.hidden = true;
   setProgress("point");
   setStatus("Определяю точку отправления…");
@@ -178,7 +183,6 @@ async function buildRoute(clickedPoint) {
     routeVariants = [];
     clearRouteLayers();
     optionsSection.hidden = true;
-    updateManualSignsPanelVisibility();
     setProgress("failed");
     setStatus(getRoutingErrorMessage(error));
 
@@ -187,5 +191,3 @@ async function buildRoute(clickedPoint) {
     }
   }
 }
-
-

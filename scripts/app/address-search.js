@@ -1,5 +1,5 @@
-﻿/* Поиск адресов через Nominatim и динамические подсказки. */
-// Приводит адресный запрос к единому виду для более мягкого сравнения улиц.
+/* Геокодинг Nominatim, ранжирование и список адресных подсказок. */
+// Нормализует запрос перед нечётким сравнением.
 function normalizeAddressSearchText(value) {
   return normalizeOsmText(value)
     .toLocaleLowerCase()
@@ -14,14 +14,14 @@ function normalizeAddressSearchText(value) {
     .trim();
 }
 
-// Достаёт номер дома из запроса, чтобы точнее поднимать результаты с тем же домом.
+// Номер дома участвует в ранжировании отдельным признаком.
 function extractHouseNumber(value) {
   return (
     normalizeAddressSearchText(value).match(/\b\d+[а-яa-z]?\b/i)?.[0] ?? ""
   );
 }
 
-// Убирает типовые слова адреса, оставляя смысловые части: название улицы и номер дома.
+// Оставляет токены, значимые для сравнения адресов.
 function getAddressMeaningfulWords(value) {
   const ignoredWords = new Set([
     "улица",
@@ -39,13 +39,13 @@ function getAddressMeaningfulWords(value) {
     .filter((word) => word && !ignoredWords.has(word));
 }
 
-// Делает более простой вариант запроса для повторной попытки, если геокодер не понял исходный ввод.
+// Строит упрощённый запрос для второй попытки геокодинга.
 function makeAddressFallbackQuery(query) {
   const words = getAddressMeaningfulWords(query);
   return words.length ? words.join(" ") : normalizeAddressSearchText(query);
 }
 
-// Оценивает результат Nominatim по похожести на пользовательский ввод.
+// Возвращает score результата относительно исходного запроса.
 function scoreAddressSearchResult(place, query) {
   const normalizedQuery = normalizeAddressSearchText(query);
 
@@ -82,7 +82,7 @@ function scoreAddressSearchResult(place, query) {
   return Infinity;
 }
 
-// Убирает дубликаты и сортирует адресные подсказки по похожести, а не только по порядку API.
+// Дедуплицирует и сортирует результаты по локальному score.
 function rankAddressSuggestions(places, query) {
   const uniquePlaces = new Map();
 
@@ -104,7 +104,7 @@ function rankAddressSuggestions(places, query) {
     })
     .map(({ place }) => place);
 }
-// Ищет адреса в Хабаровске через Nominatim; в промышленном проекте нужен отдельный геокодер.
+// Ограничивает поиск Nominatim Хабаровском.
 async function findAddress(query) {
   if (activeAddressRequest) {
     activeAddressRequest.abort();
@@ -130,27 +130,26 @@ async function findAddress(query) {
 
     return response.json();
   } finally {
-    // Старый запрос не должен очищать ссылку на более новый активный запрос.
+    // Не сбрасываем controller, если уже запущен следующий запрос.
     if (activeAddressRequest === controller) {
       activeAddressRequest = null;
     }
   }
 }
 
-// Очищает результаты поиска перед новым вводом или после выбора адреса.
+// Сбрасывает текущее состояние подсказок.
 function clearAddressSuggestions() {
   suggestionsElement.replaceChildren();
   suggestionsElement.hidden = true;
 }
 
-
-// Показывает крестик очистки только тогда, когда в поле есть адрес или выбрана точка.
+// Синхронизирует видимость кнопки очистки.
 function updateAddressClearVisibility() {
   if (!addressClearButton) return;
   addressClearButton.hidden = !addressInput.value.trim() && !startMarker;
 }
 
-// Формирует короткий, читаемый адрес из ответа Nominatim.
+// Собирает короткую подпись из address-полей Nominatim.
 function formatReadableAddress(place) {
   if (!place) return "";
 
@@ -171,8 +170,7 @@ function formatReadableAddress(place) {
   return (place.display_name ?? "").split(",").slice(0, 3).join(",").trim();
 }
 
-// По координатам получает ближайший адрес. Это нужно после клика по карте:
-// пользователь ставит точку, а поле поиска само показывает понятный адрес.
+// Reverse geocoding для точки, выбранной кликом по карте.
 async function updateAddressInputFromPoint(point) {
   if (activeReverseAddressRequest) {
     activeReverseAddressRequest.abort();
@@ -218,7 +216,7 @@ async function updateAddressInputFromPoint(point) {
     }
   }
 }
-// Передаёт найденный адрес в тот же механизм, что и клик пользователя по карте.
+// Передаёт результат поиска в общий сценарий построения.
 function selectAddress(place) {
   const point = L.latLng(Number(place.lat), Number(place.lon));
 
@@ -230,7 +228,7 @@ function selectAddress(place) {
   buildRoute(point);
 }
 
-// Отображает выпадающий список адресов и безопасно подсвечивает совпадение.
+// Рендерит подсказки через DOM API без вставки внешнего HTML.
 function showAddressSuggestions(places, query) {
   suggestionsElement.replaceChildren();
 
@@ -263,7 +261,7 @@ function showAddressSuggestions(places, query) {
   suggestionsElement.hidden = false;
 }
 
-// Выполняет поиск адреса и игнорирует ответ, если пользователь уже изменил запрос.
+// Игнорирует устаревший ответ после изменения строки поиска.
 async function searchAddressSuggestions(query) {
   if (query.length < 1) {
     clearAddressSuggestions();
@@ -315,5 +313,3 @@ async function searchAddressSuggestions(query) {
     activeAddressRequest = null;
   }
 }
-
-

@@ -1,4 +1,4 @@
-/* Карта Leaflet, popup и визуальные дорожные знаки на карте. */
+/* Контейнер карты, popup Leaflet и маркеры дорожных объектов. */
 .map-area {
   position: relative;
   min-height: 540px;
@@ -67,26 +67,6 @@
 
 .safety-sign--warning {
   background: #fff3cd;
-}
-
-.safety-photo-placeholder {
-  display: grid;
-  width: 150px;
-  min-height: 96px;
-  padding: 12px;
-  color: #5f6368;
-  background: linear-gradient(145deg, #edf2f7, #dfe7f1);
-  border-radius: 8px;
-  place-items: center;
-  text-align: center;
-}
-
-.safety-photo-placeholder span {
-  font-size: 28px;
-}
-.safety-photo-placeholder small {
-  margin-top: 4px;
-  font-size: 11px;
 }
 
 .safety-sign--speed {

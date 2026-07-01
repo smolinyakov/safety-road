@@ -1,4 +1,4 @@
-/* Поделиться маршрутом: системное меню устройства, QR-код и десктопные сервисы. */
+/* Системный share, QR-код и десктопные каналы отправки маршрута. */
 (function () {
   const modal = document.getElementById("shareRouteModal");
   const qr = document.getElementById("routeQrCode");

@@ -1,11 +1,11 @@
-/* Общие функции маршрутов: статусы, форматирование, запросы и подбор вариантов. */
-// Показывает пользователю краткое сообщение о текущем состоянии приложения.
+/* Запросы маршрутов, фильтрация вариантов и состояние построения. */
+// Обновляет текстовый статус построения.
 function setStatus(message) {
   statusElement.textContent = message;
 }
 
-// Управляет этапами построения: активный этап крутится, завершённый получает галочку.
-// Если построение сорвалось, последний активный этап получает красный крестик без анимации.
+// Синхронизирует состояния шагов прогресса.
+// При ошибке активный шаг переводится в failed.
 function setProgress(stage) {
   const stages = ["point", "route", "variants"];
 
@@ -47,11 +47,11 @@ function setProgress(stage) {
   }
 }
 
-// Не маскируем ошибку сети: выводим текст, который реально вернул код или сервис.
+// Возвращает сообщение исходной ошибки без подмены сетевого статуса.
 function getRoutingErrorMessage(error) {
   return `Маршрут не построен: ${error.message || String(error)}`;
 }
-// Формирует понятное объяснение условной оценки выбранного маршрута.
+// Формирует краткие причины присвоенного уровня маршрута.
 function updateRouteReasons(variant) {
   const shortestDistance = Math.min(
     ...routeVariants.map((item) => item.route.distance),
@@ -76,19 +76,19 @@ function updateRouteReasons(variant) {
   routeReasonsElement.hidden = false;
 }
 
-// Преобразует метры в компактный вид для карточки маршрута.
+// Форматирует расстояние для карточки.
 function formatDistance(meters) {
   return meters < 1000
     ? `${Math.round(meters)} м`
     : `${(meters / 1000).toFixed(1).replace(".", ",")} км`;
 }
 
-// Внешний маршрутизатор возвращает длительность в секундах.
+// Форматирует длительность OSRM из секунд в минуты.
 function formatDuration(seconds) {
   return `≈ ${Math.max(1, Math.round(seconds / 60))} мин`;
 }
 
-// Собирает URL OSRM-совместимого пешеходного маршрутизатора. В URL координаты идут как «долгота, широта».
+// Собирает OSRM URL; сервис принимает координаты в порядке lng,lat.
 function makeRoutingUrl(start, viaPoint = null, alternatives = "false") {
   const coordinates = [[start.lat, start.lng]];
 
@@ -111,7 +111,7 @@ function makeRoutingUrl(start, viaPoint = null, alternatives = "false") {
   return `${routingService}/${path}?${parameters}`;
 }
 
-// Выполняет запрос маршрута и отменяет его по тайм-ауту или при выборе новой точки.
+// Выполняет OSRM-запрос с общим AbortSignal и тайм-аутом.
 async function requestRoutes(
   start,
   signal,
@@ -141,7 +141,7 @@ async function requestRoutes(
   }
 }
 
-// Объединяет результаты разных запросов, не допуская одинаковой геометрии.
+// Объединяет ответы OSRM по уникальной геометрии.
 function mergeUniqueRoutes(...routeGroups) {
   const uniqueRoutes = new Map();
 
@@ -154,7 +154,7 @@ function mergeUniqueRoutes(...routeGroups) {
   return [...uniqueRoutes.values()];
 }
 
-// Если обычный ответ проходит через красную линию, запрашивает варианты по обе стороны от неё.
+// Запрашивает обходные варианты через рассчитанные промежуточные точки.
 async function requestDangerRoadDetours(start, sourceRoutes, signal) {
   const viaPoints = makeDangerRoadDetourPoints(sourceRoutes);
 
@@ -171,7 +171,7 @@ async function requestDangerRoadDetours(start, sourceRoutes, signal) {
   );
 }
 
-// Убирает пути, которые больше чем на 25% длиннее или медленнее лучшего варианта.
+// Отбрасывает варианты, выходящие за допустимое отклонение от лучшего.
 function filterReasonableRoutes(routes) {
   if (!routes.length) return [];
 
@@ -186,7 +186,7 @@ function filterReasonableRoutes(routes) {
   });
 }
 
-// Создаёт компактный отпечаток геометрии, чтобы не добавлять один и тот же путь дважды.
+// Строит стабильный ключ геометрии для дедупликации.
 function routeSignature(route) {
   const points = route.geometry.coordinates;
   const indexes = [0, 0.25, 0.5, 0.75, 1].map((fraction) =>
@@ -198,7 +198,7 @@ function routeSignature(route) {
     .join("|");
 }
 
-// Вычисляет расстояние между координатами по поверхности Земли; входной формат — [долгота, широта].
+// Считает haversine-расстояние между координатами [lng, lat].
 function haversineDistance(first, second) {
   const toRadians = (value) => (value * Math.PI) / 180;
   const earthRadius = 6371000;
@@ -215,7 +215,7 @@ function haversineDistance(first, second) {
   return 2 * earthRadius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Не пропускает альтернативы, отличающиеся от основного пути одной бессмысленной петлёй.
+// Проверяет, что альтернатива достаточно отличается от уже выбранных.
 function isMeaningfullyDifferent(candidate, existingRoutes) {
   const candidatePoints = candidate.geometry.coordinates;
   const sampleCount = 16;
@@ -240,7 +240,7 @@ function isMeaningfullyDifferent(candidate, existingRoutes) {
   });
 }
 
-// Считает повороты и пересечения из шагов, полученных от маршрутизатора.
+// Собирает метрики из OSRM steps.
 function countRouteFeatures(route) {
   const steps = (route.legs ?? []).flatMap((leg) => leg.steps ?? []);
   const turns = steps.filter((step) => {
@@ -255,7 +255,7 @@ function countRouteFeatures(route) {
   return { turns, intersections };
 }
 
-// Назначает учебный статус маршрутам. Это эвристика, а не реальная статистика ДТП.
+// Назначает демонстрационный уровень по относительным метрикам маршрутов.
 function assessRoutes(routes) {
   const variants = routes.map((route) => {
     const { turns, intersections } = countRouteFeatures(route);
@@ -274,10 +274,10 @@ function assessRoutes(routes) {
     const lastIndex = variants.length - 1;
     let level = "Рекомендуемый";
     let badgeClass = "safe";
-    let color = "#1e9b68";
+    let color = "#00c978";
     let mutedColor = "#48ad81";
 
-    // Третий естественный вариант отмечаем как менее предпочтительный.
+    // Третий вариант всегда занимает нижний уровень рейтинга.
     if (variants.length >= 3 && index === lastIndex) {
       level = "Менее предпочтительный";
       badgeClass = "risk";
@@ -294,7 +294,7 @@ function assessRoutes(routes) {
   });
 }
 
-// Переводит GeoJSON-координаты из ответа сервиса в порядок, понятный Leaflet.
+// Меняет порядок GeoJSON [lng, lat] на Leaflet [lat, lng].
 function getRouteCoordinates(variant) {
   return variant.route.geometry.coordinates.map(([longitude, latitude]) => [
     latitude,
@@ -302,7 +302,7 @@ function getRouteCoordinates(variant) {
   ]);
 }
 
-// Перед отрисовкой нового выбора удаляем все слои старой линии.
+// Удаляет линии предыдущего выбранного варианта.
 function clearRouteLayers() {
   routeLayers.forEach((layer) => map.removeLayer(layer));
   routeLayers = [];

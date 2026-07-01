@@ -1,5 +1,5 @@
-﻿/* Выбор школы: локальная база, нечёткий поиск и перенос карты к выбранной школе. */
-// Инициализирует выпадающий список из локальной базы учреждений.
+/* Выбор школы из локальной базы и нечёткий поиск по названию. */
+// Инициализирует список учреждений из schools-data.js.
 function initializeSchoolPicker() {
   selectedSchool =
     khabarovskSchools.find((item) => /№\s*85|#\s*85|\b85\b/i.test(item.name)) ??
@@ -9,18 +9,17 @@ function initializeSchoolPicker() {
   updateSelectedSchoolCard();
   renderSchoolList(schoolSearchInput.value);
 }
-// Обновляет текст выбранной школы в верхней карточке.
+// Синхронизирует верхнюю карточку с выбранной школой.
 function updateSelectedSchoolCard() {
   selectedSchoolNameElement.textContent = selectedSchool.name;
   selectedSchoolAddressElement.textContent = selectedSchool.address;
 }
 
-// Открывает или закрывает список школ по стрелке в hero-блоке.
+// Переключает dropdown выбора школы.
 function setSchoolPickerOpen(isOpen) {
   schoolPickerPanel.hidden = !isOpen;
   schoolPickerButton.setAttribute("aria-expanded", String(isOpen));
-  // Класс нужен мобильной верстке: когда список школ открыт, поиск адреса
-  // сдвигается ниже и не накладывается на выпадающую панель.
+  // На мобильном класс разводит dropdown школы и нижнюю панель.
   document.body.classList.toggle("is-school-picker-open", isOpen);
 
   if (isOpen) {
@@ -29,7 +28,7 @@ function setSchoolPickerOpen(isOpen) {
   }
 }
 
-// Приводит строку поиска и название школы к единому виду: ё=е, №=#, лишняя пунктуация убирается.
+// Нормализует название перед сравнением.
 function normalizeSchoolSearchText(value) {
   return normalizeOsmText(value)
     .toLocaleLowerCase()
@@ -41,12 +40,12 @@ function normalizeSchoolSearchText(value) {
     .trim();
 }
 
-// Достаёт номер школы из запроса или названия: «85», «№85», «школа 85» считаются одним смыслом.
+// Извлекает номер учреждения как отдельный критерий поиска.
 function extractSchoolNumber(value) {
   return normalizeSchoolSearchText(value).match(/#?\s*(\d{1,3})/)?.[1] ?? "";
 }
 
-// Расстояние Левенштейна показывает, насколько две строки похожи с учётом опечаток.
+// Расстояние Левенштейна учитывает опечатки в названии.
 function getLevenshteinDistance(first, second) {
   if (first === second) return 0;
   if (!first.length) return second.length;
@@ -77,7 +76,7 @@ function getLevenshteinDistance(first, second) {
   return previousRow[second.length];
 }
 
-// Оценивает, насколько школа подходит под запрос. Чем меньше score, тем выше школа в списке.
+// Чем ниже score, тем выше учреждение в выдаче.
 function scoreSchoolSearchResult(item, query) {
   const normalizedQuery = normalizeSchoolSearchText(query);
 
@@ -132,7 +131,7 @@ function scoreSchoolSearchResult(item, query) {
   return Infinity;
 }
 
-// Возвращает школы, отсортированные по похожести на запрос, а не только по точному вхождению.
+// Возвращает учреждения по возрастанию локального score.
 function getMatchingSchools(query) {
   return khabarovskSchools
     .map((item, index) => ({
@@ -147,7 +146,7 @@ function getMatchingSchools(query) {
     )
     .map(({ item }) => item);
 }
-// Рисует список школ и лицеев с учётом строки поиска.
+// Рендерит отфильтрованный список учреждений.
 function renderSchoolList(query = "", loadingMessage = "") {
   const filteredSchools = getMatchingSchools(query);
 
@@ -188,7 +187,7 @@ function renderSchoolList(query = "", loadingMessage = "") {
   });
 }
 
-// Делает выбранную школу новой точкой назначения и переносит карту к ней.
+// Меняет точку назначения и центрирует карту.
 function selectSchool(schoolItem) {
   clearManualSigns();
   selectedSchool = schoolItem;
@@ -198,7 +197,7 @@ function selectSchool(schoolItem) {
   setSchoolPickerOpen(false);
   map.setView(school, 16);
 
-  // Если стартовая точка уже была выбрана, перестраиваем маршрут к новой школе.
+  // Существующий маршрут перестраивается к новой школе.
   if (startMarker) {
     buildRoute(startMarker.getLatLng());
   } else {
@@ -207,4 +206,3 @@ function selectSchool(schoolItem) {
     );
   }
 }
-

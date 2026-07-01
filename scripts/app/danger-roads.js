@@ -1,6 +1,6 @@
-/* Фиксированные учебные опасные участки возле школ Хабаровска. */
-// Координаты один раз взяты из геометрии дорог OpenStreetMap и сохранены локально.
-// Это демонстрационные данные: они не являются статистикой ДТП или официальным реестром.
+/* Локальный набор демонстрационных опасных участков возле школ. */
+// Геометрия привязана к дорогам OSM и хранится локально.
+// Данные не являются официальным реестром или статистикой ДТП.
 const fixedDangerRoads = [
     {
         "id":  "school-85",
@@ -319,10 +319,10 @@ const fixedDangerRoads = [
 ];
 
 const dangerRoadClearanceMeters = 14;
-const dangerWarningMarkerMinZoom = 13;
+const dangerWarningMarkerMinZoom = 15;
 const fixedDangerWarningMarkers = [];
 
-// Красные отрезки и предупреждающие знаки образуют единый слой и скрываются одновременно.
+// Линии и крайние предупреждающие маркеры переключаются как один слой.
 function syncDangerRoadVisibility() {
   const shouldBeVisible = map.getZoom() >= dangerWarningMarkerMinZoom;
   const dangerLayers = [
@@ -341,7 +341,7 @@ function syncDangerRoadVisibility() {
   });
 }
 
-// Возвращает точку на заданной доле длины ломаной, а не просто по индексу массива.
+// Интерполирует точку по доле полной длины полилинии.
 function getDangerRoadPoint(path, fraction) {
   const lengths = [];
   let totalLength = 0;
@@ -396,7 +396,7 @@ function createDangerRoadWarningIcon() {
   });
 }
 
-// Рисует участки сразу после создания карты. Этот слой не удаляется при смене маршрута.
+// Создаёт постоянный слой опасных участков.
 function drawFixedDangerRoads() {
   const paneName = "fixed-danger-roads";
   const pane = map.getPane(paneName) ?? map.createPane(paneName);
@@ -439,7 +439,7 @@ function drawFixedDangerRoads() {
   });
 }
 
-// Переводит долготу и широту в локальные метры для геометрических проверок.
+// Проецирует координаты в локальные метры для геометрических тестов.
 function projectToLocalMeters(point, referenceLatitude) {
   const metersPerDegree = 111320;
   const longitudeScale = Math.cos((referenceLatitude * Math.PI) / 180);
@@ -515,7 +515,7 @@ function segmentDistanceMeters(firstStart, firstEnd, secondStart, secondEnd) {
   );
 }
 
-// Возвращает красные участки, которых касается геометрия конкретного маршрута.
+// Возвращает участки, пересекающиеся с геометрией маршрута.
 function getCrossedDangerRoads(route, clearance = dangerRoadClearanceMeters) {
   const routePoints = route?.geometry?.coordinates ?? [];
   if (routePoints.length < 2) return [];
@@ -553,7 +553,7 @@ function filterRoutesAvoidingFixedDangerRoads(routes) {
   return routes.filter(routeAvoidsFixedDangerRoads);
 }
 
-// Создаёт точки по обе стороны от опасной дороги. Маршрутизатор использует их для поиска объезда.
+// Рассчитывает промежуточные точки для запросов обходного маршрута.
 function makeDangerRoadDetourPoints(routes, offsetMeters = 95) {
   const crossedRoads = new Map();
 
