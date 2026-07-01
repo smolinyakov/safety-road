@@ -129,9 +129,12 @@ async function expandReasonableRoutes(startPoint, initialRoutes, controller) {
 
   try {
     for (const viaPoint of makeSensibleViaPoints(baseRoute)) {
+      const reasonableRouteCount =
+        filterReasonableRoutes(collectedRoutes).length;
+
       if (
         controller.signal.aborted ||
-        collectedRoutes.length >= maximumReasonableRoutes
+        reasonableRouteCount >= maximumReasonableRoutes
       ) {
         break;
       }

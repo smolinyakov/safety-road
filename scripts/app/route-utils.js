@@ -171,18 +171,27 @@ async function requestDangerRoadDetours(start, sourceRoutes, signal) {
   );
 }
 
-// Отбрасывает варианты, выходящие за допустимое отклонение от лучшего.
+// Допускает заметные объезды, но отбрасывает маршруты с чрезмерной петлёй.
 function filterReasonableRoutes(routes) {
   if (!routes.length) return [];
 
-  const shortestDistance = Math.min(...routes.map((route) => route.distance));
-  const fastestDuration = Math.min(...routes.map((route) => route.duration));
+  const shortestRoute = routes.reduce((best, route) =>
+    route.distance < best.distance ? route : best,
+  );
+  const fastestRoute = routes.reduce((best, route) =>
+    route.duration < best.duration ? route : best,
+  );
+  const maximumDetourRatio = 1.7;
 
   return routes.filter((route) => {
-    const isTooLong = route.distance > shortestDistance * 1.25;
-    const isTooSlow = route.duration > fastestDuration * 1.25;
+    if (route === shortestRoute || route === fastestRoute) {
+      return true;
+    }
 
-    return !isTooLong && !isTooSlow;
+    return (
+      route.distance <= shortestRoute.distance * maximumDetourRatio &&
+      route.duration <= fastestRoute.duration * maximumDetourRatio
+    );
   });
 }
 
