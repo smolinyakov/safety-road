@@ -461,6 +461,9 @@ async function restoreSharedRouteFromUrl() {
   shouldRestoreManualSignsFromUrl = urlParameters.has("signs");
 
   if (!savedStart) {
+    if (shouldRestoreManualSignsFromUrl) {
+      restoreManualSignsFromUrl();
+    }
     shouldRestoreManualSignsFromUrl = false;
     return;
   }

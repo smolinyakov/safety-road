@@ -15,7 +15,7 @@
   const button = document.createElement("button");
   button.type = "button";
   button.className = "share-route-button";
-  button.hidden = true;
+  button.hidden = false;
   button.innerHTML = `
     <span class="share-route-icon" aria-hidden="true">
       <img src="images/share/share.png" alt="" />
@@ -26,30 +26,15 @@
   const mobileQrButton = document.createElement("button");
   mobileQrButton.type = "button";
   mobileQrButton.className = "mobile-route-qr-button";
-  mobileQrButton.hidden = true;
+  mobileQrButton.hidden = false;
   mobileQrButton.setAttribute("aria-label", "Показать QR-код маршрута");
   mobileQrButton.innerHTML = `<img class="mobile-route-qr-icon" src="images/share/qr.png" alt="" />`;
 
   const shareHost = document.getElementById("share-button-host");
-  const routesSection = document.getElementById("route-options-section");
   const mobileShareQuery = window.matchMedia("(max-width: 760px)");
   let qrFile = null;
 
   shareHost?.append(button, mobileQrButton);
-
-  function updateShareButtonVisibility() {
-    const shouldHide = !routesSection || routesSection.hidden;
-    button.hidden = shouldHide;
-    mobileQrButton.hidden = shouldHide;
-  }
-
-  updateShareButtonVisibility();
-  if (routesSection) {
-    new MutationObserver(updateShareButtonVisibility).observe(routesSection, {
-      attributes: true,
-      attributeFilter: ["hidden"],
-    });
-  }
 
   function setShareStatus(message, isError = false) {
     if (!statusElement) return;
@@ -251,6 +236,12 @@
     setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     setShareStatus("QR-код сохранён как PNG.");
   }
+
+  window.addEventListener("manual-signs-change", () => {
+    if (!modal.hidden) {
+      prepareShareData();
+    }
+  });
 
   button.addEventListener("click", handleShareButtonClick);
   mobileQrButton.addEventListener("click", () => openModal({ qrOnly: true }));

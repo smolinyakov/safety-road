@@ -102,7 +102,7 @@ let addressSearchTimer;
 let activeReverseAddressRequest;
 let currentProgressStage = "idle";
 let isAddingManualSign = false;
-let selectedManualSignType = "crossing";
+let selectedManualSignType = "parent-safe";
 let manualSigns = [];
 let shouldRestoreManualSignsFromUrl = false;
 

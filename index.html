@@ -143,42 +143,54 @@
 
         <section
           class="manual-signs-panel"
-          aria-label="Ручное добавление дорожных знаков"
+          aria-label="Родительские отметки на карте"
         >
-          <h2>Дорожные знаки</h2>
+          <h2>Добавление знаков </h2>
           <button class="add-sign-toggle" id="add-sign-toggle" type="button">
             Добавить знак
           </button>
           <div class="sign-picker" id="sign-picker" hidden>
-            <p>Выберите тип знака.</p>
-            <div class="sign-options" role="listbox" aria-label="Тип знака">
+            <p>Что вы хотите отметить?</p>
+            <div
+              class="sign-options"
+              role="listbox"
+              aria-label="Тип родительской отметки"
+            >
               <button
                 class="sign-option is-selected"
                 type="button"
-                data-sign-type="crossing"
+                data-sign-type="parent-safe"
               >
-                <img src="images/cross.png" alt="" />
-                <span>Пешеходный переход</span>
-              </button>
-              <button class="sign-option" type="button" data-sign-type="light">
-                <img src="images/light.png" alt="" />
-                <span>Светофор</span>
-              </button>
-              <button class="sign-option" type="button" data-sign-type="speed">
                 <span
-                  class="sign-option-icon sign-option-icon--speed"
+                  class="sign-option-icon sign-option-icon--parent sign-option-icon--parent-safe"
                   aria-hidden="true"
-                  >40</span
+                  >✓</span
                 >
-                <span>Ограничение 40</span>
+                <span>Безопасный участок</span>
               </button>
-              <button class="sign-option" type="button" data-sign-type="danger">
-                <span
-                  class="sign-option-icon sign-option-icon--danger"
-                  aria-hidden="true"
-                  >!</span
-                >
-                <span>Опасный участок дороги</span>
+              <button
+                class="sign-option"
+                type="button"
+                data-sign-type="parent-attention"
+              >
+                <img src="images/yellow.png" alt="" />
+                <span>Нужно внимание</span>
+              </button>
+              <button
+                class="sign-option"
+                type="button"
+                data-sign-type="parent-danger"
+              >
+                <img src="images/red.png" alt="" />
+                <span>Опасный участок</span>
+              </button>
+              <button
+                class="sign-option"
+                type="button"
+                data-sign-type="parent-meeting"
+              >
+                <img src="images/star.png" alt="" />
+                <span>Произвольная точка</span>
               </button>
             </div>
             <div class="sign-picker-actions">
@@ -194,7 +206,7 @@
                 id="clear-manual-signs"
                 type="button"
               >
-                Очистить все знаки
+                Очистить все отметки
               </button>
             </div>
           </div>

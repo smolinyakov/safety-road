@@ -53,6 +53,23 @@ function updateSafetyMarkersVisibility() {
 
 // Возвращает Leaflet-иконку для выбранного типа объекта.
 function createSafetyIcon(symbol, type) {
+  const parentIconUrls = {
+    "parent-attention": "images/yellow.png",
+    "parent-danger": "images/red.png",
+    "parent-meeting": "images/star.png",
+  };
+  const parentIconUrl = parentIconUrls[type];
+
+  if (parentIconUrl) {
+    const iconSize = 40;
+
+    return L.icon({
+      iconUrl: parentIconUrl,
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize / 2, iconSize / 2],
+      popupAnchor: [0, -iconSize / 2],
+    });
+  }
   // Переход и светофор используют те же PNG, что и панель ручных знаков.
   if (type === "crossing" || type === "light") {
     const isTrafficLight = type === "light";

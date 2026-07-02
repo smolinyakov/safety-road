@@ -334,7 +334,6 @@
   .sidebar.is-mobile-address-searching > .share-button-host,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .route-build-section,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > #route-options-section,
-  body:not(.has-start-point) .sidebar.is-mobile-expanded > .share-button-host,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .legend,
   body:not(.has-start-point) .sidebar.is-mobile-expanded > .risk-help,
   .sidebar.is-mobile-hidden > .address-section,

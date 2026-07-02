@@ -1,21 +1,21 @@
 /* Пользовательские дорожные знаки и их сериализация в ссылку маршрута. */
 // Конфигурация доступных типов знаков.
 const manualSignTypes = {
-  crossing: {
-    symbol: "🚶",
-    title: "Пешеходный переход",
+  "parent-safe": {
+    symbol: "✓",
+    title: "Безопасный участок",
   },
-  light: {
-    symbol: "🚦",
-    title: "Светофор",
-  },
-  speed: {
-    symbol: "40",
-    title: "Ограничение скорости: 40 км/ч",
-  },
-  danger: {
+  "parent-attention": {
     symbol: "!",
-    title: "Опасный участок дороги",
+    title: "Нужно внимание",
+  },
+  "parent-danger": {
+    symbol: "!",
+    title: "Опасный участок",
+  },
+  "parent-meeting": {
+    symbol: "★",
+    title: "Место встречи с ребёнком",
   },
 };
 
@@ -26,7 +26,7 @@ function makeManualSignPopup(sign) {
   return `
     <div class="safety-popup">
       <strong>${title}</strong>
-      <button class="manual-sign-remove" type="button" data-manual-sign-id="${sign.id}">Удалить знак</button>
+      <button class="manual-sign-remove" type="button" data-manual-sign-id="${sign.id}">Удалить отметку</button>
     </div>
   `;
 }
@@ -39,11 +39,11 @@ function renderManualSigns() {
       sign.marker = null;
     }
 
-    const typeInfo = manualSignTypes[sign.type] ?? manualSignTypes.crossing;
+    const typeInfo = manualSignTypes[sign.type] ?? manualSignTypes["parent-safe"];
     const marker = L.marker([sign.lat, sign.lng], {
       icon: createSafetyIcon(typeInfo.symbol, sign.type),
       zIndexOffset:
-        sign.type === "light" || sign.type === "danger" ? 1200 : 900,
+        sign.type === "parent-danger" ? 1200 : 900,
     });
     syncSafetyMarkerVisibility(marker, sign.type);
 
@@ -61,6 +61,11 @@ function renderManualSigns() {
   });
 }
 
+// Сообщает share-модулю, что ссылку и QR нужно собрать заново.
+function notifyManualSignsChanged() {
+  window.dispatchEvent(new Event("manual-signs-change"));
+}
+
 // Сохраняет новый знак и синхронизирует слой карты.
 function addManualSign(latlng, type = selectedManualSignType) {
   manualSigns.push({
@@ -73,6 +78,7 @@ function addManualSign(latlng, type = selectedManualSignType) {
     marker: null,
   });
   renderManualSigns();
+  notifyManualSignsChanged();
 }
 
 // Удаляет последний знак для Ctrl/Cmd+Z.
@@ -93,6 +99,7 @@ function removeManualSign(id) {
   }
 
   manualSigns = manualSigns.filter((item) => item.id !== id);
+  notifyManualSignsChanged();
 }
 
 // Очищает слой и при необходимости завершает режим постановки.
@@ -103,6 +110,7 @@ function clearManualSigns(shouldExitMode = true) {
     }
   });
   manualSigns = [];
+  notifyManualSignsChanged();
 
   if (shouldExitMode) {
     setManualSignMode(false);
@@ -114,7 +122,7 @@ function setManualSignMode(isActive) {
   isAddingManualSign = isActive;
   signPicker.hidden = !isActive;
   addSignToggle.classList.toggle("is-active", isActive);
-  addSignToggle.textContent = isActive ? "Скрыть" : "Добавить знак";
+  addSignToggle.textContent = isActive ? "Скрыть" : "Добавить отметку";
   mapArea?.classList.toggle("is-placing-sign", isActive);
 }
 
@@ -163,4 +171,5 @@ function restoreManualSignsFromUrl() {
     .filter(Boolean);
 
   renderManualSigns();
+  notifyManualSignsChanged();
 }
